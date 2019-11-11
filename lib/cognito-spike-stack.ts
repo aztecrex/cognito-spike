@@ -49,6 +49,13 @@ export class CognitoSpikeStack extends cdk.Stack {
 
     });
 
+    new cognito.CfnUserPoolClient(this, "CJClient", {
+      userPoolId: pool.ref,
+      generateSecret: true,
+      readAttributes: ["email"],
+      writeAttributes: [],
+    });
+
     new cognito.CfnUserPoolDomain(this, "Domain", {
       domain: "imacomputer",
       userPoolId: pool.ref,
