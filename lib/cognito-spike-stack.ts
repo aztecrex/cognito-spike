@@ -63,8 +63,11 @@ export class CognitoSpikeStack extends cdk.Stack {
       allowedOAuthFlowsUserPoolClient: true,
     });
 
+    // Note: to change domain, this component must be removed.
+    // CFN cannot just change the name. Probably this should go
+    // into a separate stack in an actual product.
     new cognito.CfnUserPoolDomain(this, "Domain", {
-      domain: "imacomputer",
+      domain: "gofightwin",
       userPoolId: pool.ref,
     });
 
