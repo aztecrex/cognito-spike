@@ -54,12 +54,20 @@ export class CognitoSpikeStack extends cdk.Stack {
       generateSecret: true,
       readAttributes: ["email"],
       writeAttributes: [],
+      callbackUrLs: ["https://demo1.cj.com/"],
+      defaultRedirectUri: "https://demo1.cj.com/",
+      supportedIdentityProviders: ["COGNITO"],
+      logoutUrLs: ["https://demo1.cj.com/logout"],
+      allowedOAuthFlows: ["code"],
+      allowedOAuthScopes: ["email", "openid"],
+      allowedOAuthFlowsUserPoolClient: true,
     });
 
     new cognito.CfnUserPoolDomain(this, "Domain", {
       domain: "imacomputer",
       userPoolId: pool.ref,
     });
+
 
   }
 }
