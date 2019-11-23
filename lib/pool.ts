@@ -82,10 +82,9 @@ export class Pool extends cdk.Stack {
 
     }
 
-
-    addSite(callbackUrls: string[] = []) {
+    addSite(callbackUrl: string) {
         var callbacks = this.client.callbackUrLs || [];
-        this.client.callbackUrLs =  [...callbackUrls, ...callbacks];
+        this.client.callbackUrLs =  [callbackUrl, ...callbacks];
     }
 
 }
