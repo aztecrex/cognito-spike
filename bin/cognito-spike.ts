@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import cdk = require('@aws-cdk/core');
-import { CognitoSpikeStack } from '../lib/cognito-spike-stack';
+import { CognitoSpike } from '../lib/cognito-spike';
 
 const app = new cdk.App();
-new CognitoSpikeStack(app, 'CognitoSpikeStack');
+new CognitoSpike(app);

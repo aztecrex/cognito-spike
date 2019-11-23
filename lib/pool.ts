@@ -1,0 +1,91 @@
+import cdk = require('@aws-cdk/core');
+import cognito = require('@aws-cdk/aws-cognito');
+import iam = require('@aws-cdk/aws-iam');
+
+export class Pool extends cdk.Stack {
+
+    private pool: cognito.CfnUserPool;
+    private client: cognito.CfnUserPoolClient;
+
+    constructor(scope: cdk.Construct) {
+        super(scope, 'pool', {});
+
+
+        const snsRole = new iam.Role(this, "UsersSNSRole", {
+            assumedBy: new iam.ServicePrincipal("cognito-idp.amazonaws.com"),
+        });
+        const snsPublishPolicy = new iam.ManagedPolicy(this, "SNSPublish", {
+            statements: [new iam.PolicyStatement(
+                {
+                    actions: ["sns:publish"],
+                    resources: ['*'],
+                }
+            )],
+        });
+        snsRole.addManagedPolicy(snsPublishPolicy);
+
+        this.pool = new cognito.CfnUserPool(this, "users", {
+            autoVerifiedAttributes: ["email"],
+            usernameAttributes: ["email"],
+            policies: {
+                passwordPolicy: {
+                    minimumLength: 8,
+                    requireLowercase: false,
+                    requireUppercase: false,
+                    requireNumbers: false,
+                    requireSymbols: false,
+                },
+
+            },
+            adminCreateUserConfig: {
+                allowAdminCreateUserOnly: false,
+            },
+            mfaConfiguration: "ON",
+            enabledMfas: ["SMS_MFA"],
+            smsConfiguration: {
+                externalId: "foobarId",
+                snsCallerArn: snsRole.roleArn,
+            },
+            deviceConfiguration: {
+                challengeRequiredOnNewDevice: true,
+                deviceOnlyRememberedOnUserPrompt: false,
+            }
+
+        });
+
+
+        const domain = new cognito.CfnUserPoolDomain(this, "Domain", {
+            domain: "gofightwin",
+            userPoolId: this.pool.ref,
+        });
+        new cdk.CfnOutput(this, 'LoginUrl', {
+            value: "https://" + domain.domain + ".auth.us-east-1.amazoncognito.com/",
+        });
+
+
+        const defaultCallback: string = 'https://platform.cj.com';
+        this.client = new cognito.CfnUserPoolClient(this, "CJClient", {
+            userPoolId: this.pool.ref,
+            generateSecret: true,
+            readAttributes: ["email"],
+            writeAttributes: [],
+            callbackUrLs: [defaultCallback],
+            defaultRedirectUri: defaultCallback,
+            supportedIdentityProviders: ["COGNITO"],
+            logoutUrLs: ["https://demo1.cj.com/logout"],
+            allowedOAuthFlows: ["code", "implicit",],
+            allowedOAuthScopes: ["email", "openid"],
+            allowedOAuthFlowsUserPoolClient: true,
+        });
+
+
+
+    }
+
+
+    addSite(callbackUrls: string[] = []) {
+        var callbacks = this.client.callbackUrLs || [];
+        this.client.callbackUrLs =  [...callbackUrls, ...callbacks];
+    }
+
+}
