@@ -40,8 +40,8 @@ export class Pool extends cdk.Stack {
             adminCreateUserConfig: {
                 allowAdminCreateUserOnly: false,
             },
-            mfaConfiguration: "ON",
-            enabledMfas: ["SMS_MFA"],
+            mfaConfiguration: "OPTIONAL",
+            enabledMfas: ["SMS_MFA", "SOFTWARE_TOKEN_MFA"],
             smsConfiguration: {
                 externalId: "foobarId",
                 snsCallerArn: snsRole.roleArn,
@@ -72,9 +72,9 @@ export class Pool extends cdk.Stack {
             callbackUrLs: [defaultCallback],
             defaultRedirectUri: defaultCallback,
             supportedIdentityProviders: ["COGNITO"],
-            logoutUrLs: ["https://demo1.cj.com/logout"],
+            logoutUrLs: ["https://platform.cj.com"],
             allowedOAuthFlows: ["code", "implicit",],
-            allowedOAuthScopes: ["email", "openid"],
+            allowedOAuthScopes: ["email", "openid", "phone", "aws.cognito.signin.user.admin", "profile"],
             allowedOAuthFlowsUserPoolClient: true,
         });
 
@@ -83,8 +83,11 @@ export class Pool extends cdk.Stack {
     }
 
     addSite(callbackUrl: string) {
-        var callbacks = this.client.callbackUrLs || [];
+        const callbacks = this.client.callbackUrLs || [];
         this.client.callbackUrLs =  [callbackUrl, ...callbacks];
+
+        var logouts = this.client.logoutUrLs || [];
+        this.client.logoutUrLs = [callbackUrl, ...logouts];
     }
 
 }
