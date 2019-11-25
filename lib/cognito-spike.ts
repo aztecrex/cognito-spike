@@ -9,8 +9,9 @@ export class CognitoSpike extends cdk.Construct {
         const pool = new Pool(this);
         const foo = new Website(this, 'foo');
         const bar = new Website(this, 'bar');
-        pool.addSite(foo.url);
-        pool.addSite(bar.url);
+        const baz = new Website(this, "baz");
+        pool.addOwnSite(foo.url);
+        pool.addOwnSite(bar.url);
 
     }
 }

@@ -82,12 +82,28 @@ export class Pool extends cdk.Stack {
 
     }
 
-    addSite(callbackUrl: string) {
+    addOwnSite(callbackUrl: string) {
         const callbacks = this.client.callbackUrLs || [];
         this.client.callbackUrLs =  [callbackUrl, ...callbacks];
 
         var logouts = this.client.logoutUrLs || [];
         this.client.logoutUrLs = [callbackUrl, ...logouts];
     }
+
+    // addForeignSite(callbackUrl: string) {
+    //     new cognito.CfnUserPoolClient(this, "CJClient", {
+    //         userPoolId: this.pool.ref,
+    //         generateSecret: true,
+    //         readAttributes: ["email"],
+    //         writeAttributes: [],
+    //         callbackUrLs: [callbackUrl],
+    //         defaultRedirectUri: callbackUrl,
+    //         supportedIdentityProviders: ["COGNITO"],
+    //         logoutUrLs: [callbackUrl],
+    //         allowedOAuthFlows: ["code", "implicit",],
+    //         allowedOAuthScopes: ["email", "openid", "phone", "aws.cognito.signin.user.admin", "profile"],
+    //         allowedOAuthFlowsUserPoolClient: true,
+    //     });
+    // }
 
 }
