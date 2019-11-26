@@ -78,9 +78,20 @@ export class Pool extends cdk.Stack {
             allowedOAuthFlowsUserPoolClient: true,
         });
 
-
+        new cognito.CfnUserPoolResourceServer(this, 'resources', {
+            identifier: 'all',
+            name: "All",
+            scopes: [
+                {
+                    scopeDescription: "All the things",
+                    scopeName: "everything",
+                },
+            ],
+            userPoolId: this.pool.ref,
+        });
 
     }
+
 
     addOwnSite(callbackUrl: string) {
         const callbacks = this.client.callbackUrLs || [];
@@ -90,20 +101,20 @@ export class Pool extends cdk.Stack {
         this.client.logoutUrLs = [callbackUrl, ...logouts];
     }
 
-    // addForeignSite(callbackUrl: string) {
-    //     new cognito.CfnUserPoolClient(this, "CJClient", {
-    //         userPoolId: this.pool.ref,
-    //         generateSecret: true,
-    //         readAttributes: ["email"],
-    //         writeAttributes: [],
-    //         callbackUrLs: [callbackUrl],
-    //         defaultRedirectUri: callbackUrl,
-    //         supportedIdentityProviders: ["COGNITO"],
-    //         logoutUrLs: [callbackUrl],
-    //         allowedOAuthFlows: ["code", "implicit",],
-    //         allowedOAuthScopes: ["email", "openid", "phone", "aws.cognito.signin.user.admin", "profile"],
-    //         allowedOAuthFlowsUserPoolClient: true,
-    //     });
-    // }
+    addForeignSite(id: string, callbackUrl: string) {
+        new cognito.CfnUserPoolClient(this, "foreign-client-" + id, {
+            userPoolId: this.pool.ref,
+            generateSecret: true,
+            readAttributes: ["email"],
+            writeAttributes: [],
+            callbackUrLs: [callbackUrl],
+            defaultRedirectUri: callbackUrl,
+            supportedIdentityProviders: ["COGNITO"],
+            logoutUrLs: [callbackUrl],
+            allowedOAuthFlows: ["code", "implicit",],
+            allowedOAuthScopes: ["email", "openid", "all/everything"],
+            allowedOAuthFlowsUserPoolClient: true,
+        });
+    }
 
 }

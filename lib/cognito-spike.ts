@@ -12,6 +12,7 @@ export class CognitoSpike extends cdk.Construct {
         const baz = new Website(this, "baz");
         pool.addOwnSite(foo.url);
         pool.addOwnSite(bar.url);
+        pool.addForeignSite("baz", baz.url);
 
     }
 }
