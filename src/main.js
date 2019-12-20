@@ -46,9 +46,9 @@ class ChallengeForm extends React.Component {
       ClientId: this.props.clientId,
     });
     const authenticationData = { Username: email, Password: password }
-      , authenticationDetails = new AuthenticationDetails(authenticationData)
-      , cognitoUser = new CognitoUser({ 
-        Username: email, 
+    , authenticationDetails = new AuthenticationDetails(authenticationData)
+    , cognitoUser = new CognitoUser({
+        Username: email,
         Pool: userPool
       })
 
@@ -57,19 +57,12 @@ class ChallengeForm extends React.Component {
       onSuccess: function(result) {
         // User authentication was successful
         console.log('onSuccess', result);
-        // var params = {
-        //   UserAttributes: [ /* required */
-        //     {
-        //       Name: 'baz', /* required */
-        //       Value: 'true'
-        //     },
-        //     /* more items */
-        //   ],        
-        // };
-        cognitoUser.updateAttributes([{Name: "custom:baz", Value: "true"}], function(err, data) {
-          if (err) console.log(err, err.stack); // an error occurred
-          else     console.log(data);           // successful response
-        })
+        cognitoUser.updateAttributes(
+          [{Name: "custom:baz", Value: "true"}],
+          (err, data) => {
+            if (err) console.log(err, err.stack); // an error occurred
+            else     console.log(data);           // successful response
+          })
       },
       onFailure: function(err) {
         // User authentication was not successful
