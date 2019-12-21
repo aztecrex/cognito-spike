@@ -1,6 +1,7 @@
 {
   "name": "cognito-spike",
   "version": "0.1.0",
+  "private": true,
   "bin": {
     "cognito-spike": "bin/cognito-spike.js"
   },
