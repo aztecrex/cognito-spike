@@ -25,8 +25,8 @@ interface LoginFormState {
 }
 
 class EPForm extends React.Component
-  <{submit(e:any, s:LoginFormState, c?:string):void}, LoginFormState> {
-  constructor(props: {submit(e:any, s: LoginFormState):void}) {
+  <{submit(s:LoginFormState):void}, LoginFormState> {
+  constructor(props: {submit(s: LoginFormState):void}) {
     super(props)
     this.state = {email: "", password: ""}
 
@@ -44,7 +44,8 @@ class EPForm extends React.Component
   }
 
   handleSubmit(e: any) {
-    this.props.submit(e, this.state)
+    e.preventDefault()
+    this.props.submit(this.state)
   }
 
   render() {
@@ -79,8 +80,7 @@ const CognitoSpikeForm = () => {
 }
 
 function challenge(clientId: string) {
-  return function(e: any, s: LoginFormState) {
-    e.preventDefault();
+  return function(s: LoginFormState) {
     const email = s.email.trim();
     const password = s.password.trim();
     const userPool = new CognitoUserPool({
@@ -121,8 +121,7 @@ function challenge(clientId: string) {
   }
 }
 
-function doLogin(e: any, s: LoginFormState) {
-  e.preventDefault();
+function doLogin(s: LoginFormState) {
   const email = s.email.trim();
   const password = s.password.trim();
   const authenticationData = { Username: email, Password: password }
@@ -153,8 +152,7 @@ function doLogin(e: any, s: LoginFormState) {
   })
 }
 
-function doSignUp(e: any, s: LoginFormState) {
-  e.preventDefault();
+function doSignUp(s: LoginFormState) {
   const email = s.email.trim();
   const password = s.password.trim();
   const attributeList = [
