@@ -1,5 +1,6 @@
 module.exports = {
-  entry: "./src/main.js",
+  entry: "./src/main2.jsx",
+  mode: "development",
   module: {
     rules: [
       {

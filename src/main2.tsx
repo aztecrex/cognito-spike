@@ -1,3 +1,4 @@
+import * as AWS from "aws-sdk"
 import {Config, CognitoIdentityCredentials} from "aws-sdk";
 import {
   CognitoUserPool,
@@ -5,12 +6,13 @@ import {
   AuthenticationDetails,
   CognitoUser
 } from "amazon-cognito-identity-js";
-import React from "react";
-import ReactDOM from "react-dom";
+import * as React from "react";
+import * as ReactDOM from "react-dom";
 import appConfig from "./config";
 
-Config.region = appConfig.region;
-Config.credentials = new CognitoIdentityCredentials({
+const config = new Config()
+config.region = appConfig.region;
+config.credentials = new CognitoIdentityCredentials({
   IdentityPoolId: appConfig.IdentityPoolId
 });
 
@@ -19,9 +21,9 @@ const userPool = new CognitoUserPool({
   ClientId: appConfig.ClientId,
 });
 
-class ChallengeForm extends React.Component {
+class ChallengeForm extends React.Component<any, any> {
 
-  constructor(props) {
+  constructor(props: any) {
     super(props);
     this.state = {
       email: '',
@@ -29,15 +31,15 @@ class ChallengeForm extends React.Component {
     };
   }
 
-  handleEmailChange(e) {
+  handleEmailChange(e: any) {
     this.setState({email: e.target.value});
   }
 
-  handlePasswordChange(e) {
+  handlePasswordChange(e: any) {
     this.setState({password: e.target.value});
   }
 
-  handleSubmit(e) {
+  handleSubmit(e: any) {
     e.preventDefault();
     const email = this.state.email.trim();
     const password = this.state.password.trim();
@@ -72,10 +74,8 @@ class ChallengeForm extends React.Component {
       customChallenge: function(challengeParameters) {
         console.log("challengeParameters", challengeParameters)
         // User authentication depends on challenge response
-        let challengeResponses
-        if (confirm(challengeParameters.question))
-          challengeResponses = 'yes';
-        else challengeResponses = 'no'
+        const challengeResponses = confirm(challengeParameters.question)
+          ? 'yes' : 'no'
         cognitoUser.sendCustomChallengeAnswer(challengeResponses, this);
       },
     });
@@ -101,8 +101,8 @@ class ChallengeForm extends React.Component {
 
 }
 
-class LoginForm extends React.Component {
-  constructor(props) {
+class LoginForm extends React.Component<any, any> {
+  constructor(props: any) {
     super(props);
     this.state = {
       email: '',
@@ -110,15 +110,15 @@ class LoginForm extends React.Component {
     };
   }
 
-  handleEmailChange(e) {
+  handleEmailChange(e: any) {
     this.setState({email: e.target.value});
   }
 
-  handlePasswordChange(e) {
+  handlePasswordChange(e: any) {
     this.setState({password: e.target.value});
   }
 
-  handleSubmit(e) {
+  handleSubmit(e: any) {
     e.preventDefault();
     const email = this.state.email.trim();
     const password = this.state.password.trim();
@@ -177,8 +177,8 @@ class LoginForm extends React.Component {
   }
 }
 
-class SignUpForm extends React.Component {
-  constructor(props) {
+class SignUpForm extends React.Component<any, any> {
+  constructor(props: any) {
     super(props);
     this.state = {
       email: '',
@@ -186,15 +186,15 @@ class SignUpForm extends React.Component {
     };
   }
 
-  handleEmailChange(e) {
+  handleEmailChange(e: any) {
     this.setState({email: e.target.value});
   }
 
-  handlePasswordChange(e) {
+  handlePasswordChange(e: any) {
     this.setState({password: e.target.value});
   }
 
-  handleSubmit(e) {
+  handleSubmit(e: any) {
     e.preventDefault();
     const email = this.state.email.trim();
     const password = this.state.password.trim();
@@ -204,12 +204,12 @@ class SignUpForm extends React.Component {
         Value: email,
       })
     ];
-    userPool.signUp(email, password, attributeList, null, (err, result) => {
+    userPool.signUp(email, password, attributeList, [], (err, result) => {
       if (err) {
         console.log(err);
         return;
       }
-      console.log('user name is ' + result.user.getUsername());
+      console.log('user name is ' + result?.user.getUsername());
       console.log('call result: ' + result);
     });
   }
