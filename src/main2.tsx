@@ -19,14 +19,33 @@ const userPool = new CognitoUserPool({
   ClientId: appConfig.ClientId,
 });
 
-interface LoginFormState {
+const CognitoSpikeForm = () => {
+  return (
+    <div>
+      <EPForm submit={doLogin}/> <br/>
+      Sign Up
+      <EPForm submit={doSignUp}/> <br/>
+      CJ Challenge
+      <EPForm submit={challenge(appConfig.ClientId)}/> <br/>
+      3rd Party Challenge
+      <EPForm submit={challenge(appConfig.foreignClient)}/>
+    </div>
+  )
+}
+
+ReactDOM.render(<CognitoSpikeForm />, document.getElementById('app'));
+
+interface EPFormState {
   email: string
   password: string
 }
 
-class EPForm extends React.Component
-  <{submit(s:LoginFormState):void}, LoginFormState> {
-  constructor(props: {submit(s: LoginFormState):void}) {
+interface EPFormProps {
+  submit(s: EPFormState): void
+}
+
+class EPForm extends React.Component<EPFormProps, EPFormState> {
+  constructor(props: EPFormProps) {
     super(props)
     this.state = {email: "", password: ""}
 
@@ -65,71 +84,49 @@ class EPForm extends React.Component
   }
 }
 
-const CognitoSpikeForm = () => {
-  return (
-    <div>
-      <EPForm submit={doLogin}/> <br/>
-      Sign Up
-      <EPForm submit={doSignUp}/> <br/>
-      CJ Challenge
-      <EPForm submit={challenge("269opr68vm5lud18faf7vi8rv6")}/> <br/>
-      3rd Party Challenge
-      <EPForm submit={challenge("37fnmm2dop67vade1i372v1si3")}/>
-    </div>
-  )
+const challenge = (clientId: string) => (s: EPFormState): void => {
+  const email = s.email.trim();
+  const password = s.password.trim();
+  const userPool = new CognitoUserPool({
+    UserPoolId: appConfig.UserPoolId,
+    ClientId: clientId,
+  });
+  const authenticationData = { Username: email, Password: password }
+  , authenticationDetails = new AuthenticationDetails(authenticationData)
+  , cognitoUser = new CognitoUser({ Username: email, Pool: userPool })
+
+  cognitoUser.setAuthenticationFlowType('CUSTOM_AUTH');
+  cognitoUser.initiateAuth(authenticationDetails, {
+    onSuccess: function(result) {
+      // User authentication was successful
+      console.log('onSuccess', result);
+      cognitoUser.updateAttributes(
+        [{Name: "custom:baz", Value: "true"}],
+        (err, data) => {
+          if (err) console.log(err, err.stack)
+          else console.log(data)
+        })
+    },
+    onFailure: function(err) {
+      // User authentication was not successful
+      console.log('onFailure', err)
+      alert("you declined to authorize baz")
+    },
+    customChallenge: function(challengeParameters) {
+      console.log("challengeParameters", challengeParameters)
+      // User authentication depends on challenge response
+      const challengeResponse = confirm(challengeParameters.question) ? 'yes' : 'no'
+      cognitoUser.sendCustomChallengeAnswer(challengeResponse, this);
+    },
+  });
 }
 
-function challenge(clientId: string) {
-  return function(s: LoginFormState) {
-    const email = s.email.trim();
-    const password = s.password.trim();
-    const userPool = new CognitoUserPool({
-      UserPoolId: appConfig.UserPoolId,
-      ClientId: clientId,
-    });
-    const authenticationData = { Username: email, Password: password }
-    , authenticationDetails = new AuthenticationDetails(authenticationData)
-    , cognitoUser = new CognitoUser({
-        Username: email,
-        Pool: userPool
-      })
-
-    cognitoUser.setAuthenticationFlowType('CUSTOM_AUTH');
-    cognitoUser.initiateAuth(authenticationDetails, {
-      onSuccess: function(result) {
-        // User authentication was successful
-        console.log('onSuccess', result);
-        cognitoUser.updateAttributes(
-          [{Name: "custom:baz", Value: "true"}],
-          (err, data) => {
-            if (err) console.log(err, err.stack); // an error occurred
-            else     console.log(data);           // successful response
-          })
-      },
-      onFailure: function(err) {
-        // User authentication was not successful
-        console.log('onFailure', err)
-        alert("you declined to authorize baz")
-      },
-      customChallenge: function(challengeParameters) {
-        console.log("challengeParameters", challengeParameters)
-        // User authentication depends on challenge response
-        const challengeResponse = confirm(challengeParameters.question) ? 'yes' : 'no'
-        cognitoUser.sendCustomChallengeAnswer(challengeResponse, this);
-      },
-    });
-  }
-}
-
-function doLogin(s: LoginFormState) {
+const doLogin = (s: EPFormState): void => {
   const email = s.email.trim();
   const password = s.password.trim();
   const authenticationData = { Username: email, Password: password }
   , authenticationDetails = new AuthenticationDetails(authenticationData)
-  , cognitoUser = new CognitoUser(
-    { Username: email
-    , Pool: userPool
-    })
+  , cognitoUser = new CognitoUser({ Username: email, Pool: userPool })
 
   cognitoUser.setAuthenticationFlowType("CUSTOM_AUTH")
   cognitoUser.authenticateUser(authenticationDetails, {
@@ -152,7 +149,7 @@ function doLogin(s: LoginFormState) {
   })
 }
 
-function doSignUp(s: LoginFormState) {
+const doSignUp = (s: EPFormState): void => {
   const email = s.email.trim();
   const password = s.password.trim();
   const attributeList = [
@@ -170,5 +167,3 @@ function doSignUp(s: LoginFormState) {
     console.log('call result: ' + result);
   });
 }
-
-ReactDOM.render(<CognitoSpikeForm />, document.getElementById('app'));
