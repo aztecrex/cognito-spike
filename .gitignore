@@ -3,6 +3,7 @@ lib/*.js
 test/*.js
 src/*.js
 src/*.jsx
+out/
 !jest.config.js
 *.d.ts
 node_modules/
