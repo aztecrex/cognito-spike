@@ -7,7 +7,11 @@ import {
 } from "amazon-cognito-identity-js";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
+import { Route, Switch } from 'react-router-dom';
 import appConfig from "./config";
+import { createBrowserHistory } from 'history';
+import { Router } from "react-router";
+export const history = createBrowserHistory();
 
 AWS.config.region = appConfig.region;
 AWS.config.credentials = new AWS.CognitoIdentityCredentials({
@@ -26,6 +30,58 @@ interface EPFormState {
 
 interface EPFormProps {
   submit(s: EPFormState): void
+}
+
+class LoginEndpoint extends React.Component<{}, {isLoggedIn: boolean}> {
+  readonly redirectUri = (new URL(document.location.href)).searchParams.get("redirect_uri") || undefined
+  readonly cognitoUser = userPool.getCurrentUser()
+
+  constructor(props: {}) {
+    super(props)
+
+    this.state = { isLoggedIn: this.cognitoUser != null }
+
+    //if (this.state.isLoggedIn && this.redirectUri) window.location.href = this.redirectUri
+  }
+
+  render() {
+    return this.state.isLoggedIn
+      ? <SignInAsForm email={this.cognitoUser!.getUsername()} />
+      : <EPForm submit={doLogin(this.redirectUri)} />
+  }
+}
+
+const LogoutEndpoint = (props: {}) => {
+  userPool.getCurrentUser()?.signOut()
+  const logoutUri = (new URL(document.location.href)).searchParams.get("logout_uri") || undefined
+  if (logoutUri) window.location.href = logoutUri
+
+  return <></>
+}
+
+class SignInAsForm extends React.Component<{email: string}, {}> {
+  constructor(props: {email: string}) {
+    super(props)
+
+    this.currentUser = this.currentUser.bind(this)
+    this.differentUser = this.differentUser.bind(this)
+  }
+
+  currentUser() {
+    window.location.href = (new URL(document.location.href)).searchParams.get("redirect_uri") || ""
+  }
+
+  differentUser() {
+    userPool.getCurrentUser()?.signOut()
+    window.location.reload()
+  }
+
+  render() {
+    return <>
+      <button onClick={this.currentUser}>Sign in as {this.props.email}</button> <br/>
+      <button onClick={this.differentUser}>Sign in as a different user?</button>
+    </>
+  }
 }
 
 class EPForm extends React.Component<EPFormProps, EPFormState> {
@@ -106,7 +162,7 @@ const challenge = (clientId: string) => (s: EPFormState): void => {
   });
 }
 
-const doLogin = (s: EPFormState): void => {
+const doLogin = (redirectUri?: string) => (s: EPFormState): void => {
   const email = s.email.trim();
   const password = s.password.trim();
   const authenticationData = { Username: email, Password: password }
@@ -126,7 +182,7 @@ const doLogin = (s: EPFormState): void => {
         }
       })
       console.log("result", result)
-      console.log(window.location.search)
+      if (redirectUri) window.location.href = redirectUri
     },
     onFailure: function(err) {
       console.log(err)
@@ -153,7 +209,7 @@ const doSignUp = (s: EPFormState): void => {
 export const CognitoSpikeForm = () => {
   return (
     <>
-      <EPForm submit={doLogin}/> <br/>
+      <EPForm submit={doLogin(undefined)}/> <br/>
       Sign Up
       <EPForm submit={doSignUp}/> <br/>
       CJ Challenge
@@ -164,4 +220,13 @@ export const CognitoSpikeForm = () => {
   )
 }
 
-ReactDOM.render(<CognitoSpikeForm />, document.getElementById('app'))
+const AuthUI = () => {
+  return (
+    <Switch>
+      <Route path='/login' render={(props) => <LoginEndpoint {...props}/>}/>
+      <Route path="/logout" render={() => <LogoutEndpoint />}/>
+    </Switch>
+  )
+}
+
+ReactDOM.render(<Router history={history}><AuthUI /></Router>, document.getElementById('app'))
