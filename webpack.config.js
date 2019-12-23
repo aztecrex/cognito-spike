@@ -1,15 +1,24 @@
 module.exports = {
-  entry: "./out/src/main.jsx",
+  entry: "./src/main.tsx",
   mode: "development",
+  devtool: "inline-source-map",
   module: {
     rules: [
       {
-        test: /\.(js|jsx)$/,
         exclude: /node_modules/,
         use: {
-          loader: "babel-loader"
+          loader: "ts-loader",
+          options: {
+            onlyCompileBundledFiles: true
+          }
         }
       }
     ]
+  },
+  resolve: {
+    extensions: [".tsx", ".ts", ".js"]
+  },
+  output: {
+    filename: "main.js",
   }
 }
