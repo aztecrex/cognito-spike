@@ -93,7 +93,7 @@ const challenge = (clientId: string) => (s: EPFormState): void => {
     },
     onFailure: function(err) {
       // User authentication was not successful
-      console.log('onFailure', err)
+      console.log(err.message || JSON.stringify(err))
       alert("you declined to authorize baz")
     },
     customChallenge: function(challengeParameters) {
@@ -112,7 +112,6 @@ const doLogin = (s: EPFormState): void => {
   , authenticationDetails = new AuthenticationDetails(authenticationData)
   , cognitoUser = new CognitoUser({ Username: email, Pool: userPool })
 
-  cognitoUser.setAuthenticationFlowType("CUSTOM_AUTH")
   cognitoUser.authenticateUser(authenticationDetails, {
     onSuccess: function(result) {
       const accessToken = result.getAccessToken().getJwtToken()
@@ -128,7 +127,7 @@ const doLogin = (s: EPFormState): void => {
       console.log(window.location.search)
     },
     onFailure: function(err) {
-      alert(err.message || JSON.stringify(err))
+      console.log(err)
     },
   })
 }
