@@ -19,22 +19,6 @@ const userPool = new CognitoUserPool({
   ClientId: appConfig.ClientId,
 });
 
-const CognitoSpikeForm = () => {
-  return (
-    <div>
-      <EPForm submit={doLogin}/> <br/>
-      Sign Up
-      <EPForm submit={doSignUp}/> <br/>
-      CJ Challenge
-      <EPForm submit={challenge(appConfig.ClientId)}/> <br/>
-      3rd Party Challenge
-      <EPForm submit={challenge(appConfig.foreignClient)}/>
-    </div>
-  )
-}
-
-ReactDOM.render(<CognitoSpikeForm />, document.getElementById('app'));
-
 interface EPFormState {
   email: string
   password: string
@@ -159,11 +143,24 @@ const doSignUp = (s: EPFormState): void => {
     })
   ];
   userPool.signUp(email, password, attributeList, [], (err, result) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
+    if (err) { console.log(err); return; }
     console.log('user name is ' + result!.user.getUsername());
     console.log('call result: ' + result);
   });
 }
+
+const CognitoSpikeForm = () => {
+  return (
+    <div>
+      <EPForm submit={doLogin}/> <br/>
+      Sign Up
+      <EPForm submit={doSignUp}/> <br/>
+      CJ Challenge
+      <EPForm submit={challenge(appConfig.ClientId)}/> <br/>
+      3rd Party Challenge
+      <EPForm submit={challenge(appConfig.foreignClient)}/>
+    </div>
+  )
+}
+
+ReactDOM.render(<CognitoSpikeForm />, document.getElementById('app'))

@@ -6,8 +6,8 @@
     "cognito-spike": "bin/cognito-spike.js"
   },
   "scripts": {
-    "build": "tsc && npm run webpack",
-    "webpack": "webpack",
+    "build": "tsc && webpack",
+    "clean": "rm -rf out/",
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk"
