@@ -17,5 +17,6 @@ export default {
   IdentityPoolId: '',
   UserPoolId: '',
   ClientId: '',
+  foreignClient: ''
 }
 ```
