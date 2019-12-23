@@ -99,7 +99,8 @@ const challenge = (clientId: string) => (s: EPFormState): void => {
     customChallenge: function(challengeParameters) {
       console.log("challengeParameters", challengeParameters)
       // User authentication depends on challenge response
-      const challengeResponse = confirm(challengeParameters.question) ? 'yes' : 'no'
+      const challengeResponse = confirm(challengeParameters.question)
+        ? 'yes' : 'no'
       cognitoUser.sendCustomChallengeAnswer(challengeResponse, this);
     },
   });
@@ -119,7 +120,8 @@ const doLogin = (s: EPFormState): void => {
       AWS.config.credentials = new AWS.CognitoIdentityCredentials({
         IdentityPoolId: appConfig.IdentityPoolId,
         Logins: {
-          ["cognito-idp."+ appConfig.region +".amazonaws.com/"+ appConfig.UserPoolId]:
+          ["cognito-idp."+ appConfig.region +".amazonaws.com/"
+            + appConfig.UserPoolId]:
             result.getIdToken().getJwtToken()
         }
       })
@@ -148,7 +150,7 @@ const doSignUp = (s: EPFormState): void => {
   });
 }
 
-const CognitoSpikeForm = () => {
+export const CognitoSpikeForm = () => {
   return (
     <>
       <EPForm submit={doLogin}/> <br/>
