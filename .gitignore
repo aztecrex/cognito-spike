@@ -1,15 +1,10 @@
-bin/*.js
-lib/*.js
-test/*.js
-src/*.js
-src/*.jsx
-out/
+*.js
+!webpack.config.js
 !jest.config.js
 *.d.ts
 node_modules/
 dist/
-.idea/
-.DS_store
+out/
 
 # CDK asset staging directory
 .cdk.staging

@@ -116,11 +116,11 @@ const doLogin = (s: EPFormState): void => {
   cognitoUser.authenticateUser(authenticationDetails, {
     onSuccess: function(result) {
       const accessToken = result.getAccessToken().getJwtToken()
-      AWS.config.region = "us-east-1"
+      AWS.config.region = appConfig.region
       AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-        IdentityPoolId: 'us-east-1:3d2383b5-9c5c-4a6a-be5d-8c095d2ea9a3',
+        IdentityPoolId: appConfig.IdentityPoolId,
         Logins: {
-          "cognito-idp.us-east-1.amazonaws.com/us-east-1_e60XYXrIE":
+          ["cognito-idp."+ appConfig.region +".amazonaws.com/"+ appConfig.UserPoolId]:
             result.getIdToken().getJwtToken()
         }
       })
@@ -151,7 +151,7 @@ const doSignUp = (s: EPFormState): void => {
 
 const CognitoSpikeForm = () => {
   return (
-    <div>
+    <>
       <EPForm submit={doLogin}/> <br/>
       Sign Up
       <EPForm submit={doSignUp}/> <br/>
@@ -159,7 +159,7 @@ const CognitoSpikeForm = () => {
       <EPForm submit={challenge(appConfig.ClientId)}/> <br/>
       3rd Party Challenge
       <EPForm submit={challenge(appConfig.foreignClient)}/>
-    </div>
+    </>
   )
 }
 
