@@ -4,24 +4,25 @@ import {
   CognitoUserAttribute,
   AuthenticationDetails,
   CognitoUser
-} from "amazon-cognito-identity-js";
-import * as React from "react";
-import * as ReactDOM from "react-dom";
-import { Route, Switch } from 'react-router-dom';
-import appConfig from "./config";
-import { createBrowserHistory } from 'history';
-import { Router } from "react-router";
-export const history = createBrowserHistory();
+} from "amazon-cognito-identity-js"
+import * as React from "react"
+import * as ReactDOM from "react-dom"
+import { Route, Switch } from 'react-router-dom'
+import appConfig from "./config"
+import { createBrowserHistory } from 'history'
+import { Router } from "react-router"
+import {CognitoAuth} from "amazon-cognito-auth-js"
+export const history = createBrowserHistory()
 
-AWS.config.region = appConfig.region;
+AWS.config.region = appConfig.region
 AWS.config.credentials = new AWS.CognitoIdentityCredentials({
   IdentityPoolId: appConfig.IdentityPoolId
-});
+})
 
 const userPool = new CognitoUserPool({
   UserPoolId: appConfig.UserPoolId,
-  ClientId: appConfig.ClientId,
-});
+  ClientId: appConfig.ClientId
+})
 
 interface EPFormState {
   email: string
@@ -32,28 +33,63 @@ interface EPFormProps {
   submit(s: EPFormState): void
 }
 
-class LoginEndpoint extends React.Component<{}, {isLoggedIn: boolean}> {
-  readonly redirectUri = (new URL(document.location.href)).searchParams.get("redirect_uri") || undefined
-  readonly cognitoUser = userPool.getCurrentUser()
+interface LoginEndpointProps {
+  clientId: string
+  redirectUri: string
+  responseType: string
+  state?: string
+  scope?: string
+}
 
-  constructor(props: {}) {
+class LoginEndpoint extends React.Component
+  <LoginEndpointProps, {isLoggedIn: boolean, email: string}> {
+
+  readonly userPool: CognitoUserPool
+  readonly cognitoUser: CognitoUser | null
+
+  constructor(props: LoginEndpointProps) {
     super(props)
+    console.log(props)
+    this.userPool = new CognitoUserPool({
+      UserPoolId: appConfig.UserPoolId,
+      ClientId: appConfig.ClientId
+    })
 
-    this.state = { isLoggedIn: this.cognitoUser != null }
+    this.cognitoUser = this.userPool.getCurrentUser()
+    this.cognitoUser?.getUserAttributes((err, xs) => {
+      console.log(xs)
+    })
 
-    //if (this.state.isLoggedIn && this.redirectUri) window.location.href = this.redirectUri
+    this.state = { isLoggedIn: this.cognitoUser != null, email: "ffff" }
   }
 
   render() {
     return this.state.isLoggedIn
       ? <SignInAsForm email={this.cognitoUser!.getUsername()} />
-      : <EPForm submit={doLogin(this.redirectUri)} />
+      : <EPForm submit={doLogin(this.props.redirectUri)} />
   }
+}
+
+const LoginEndpointParser = () => {
+  const x = new URL(document.location.href).searchParams
+  , p =
+    { clientId: x.get("client_id") || ""
+    , redirectUri: x.get("redirect_uri") || ""
+    , responseType: x.get("response_type") || ""
+    , state: x.get("state") || undefined
+    , scope: x.get("scope") || undefined
+    }
+
+  if (p.clientId == "" || p.redirectUri == "" || p.responseType == "")
+    console.error("bad request", x)
+
+  return <LoginEndpoint {...p}/>
 }
 
 const LogoutEndpoint = (props: {}) => {
   userPool.getCurrentUser()?.signOut()
-  const logoutUri = (new URL(document.location.href)).searchParams.get("logout_uri") || undefined
+  const logoutUri = new URL(document.location.href)
+    .searchParams.get("logout_uri") || undefined
   if (logoutUri) window.location.href = logoutUri
 
   return <></>
@@ -68,7 +104,8 @@ class SignInAsForm extends React.Component<{email: string}, {}> {
   }
 
   currentUser() {
-    window.location.href = (new URL(document.location.href)).searchParams.get("redirect_uri") || ""
+    window.location.href = (new URL(document.location.href))
+      .searchParams.get("redirect_uri") || ""
   }
 
   differentUser() {
@@ -95,11 +132,11 @@ class EPForm extends React.Component<EPFormProps, EPFormState> {
   }
 
   handleEmailChange(e: any) {
-    this.setState({email: e.target.value});
+    this.setState({email: e.target.value})
   }
 
   handlePasswordChange(e: any) {
-    this.setState({password: e.target.value});
+    this.setState({password: e.target.value})
   }
 
   handleSubmit(e: any) {
@@ -125,13 +162,13 @@ class EPForm extends React.Component<EPFormProps, EPFormState> {
 }
 
 const challenge = (clientId: string) => (s: EPFormState): void => {
-  const email = s.email.trim();
-  const password = s.password.trim();
-  const userPool = new CognitoUserPool({
+  const email = s.email.trim()
+  , password = s.password.trim()
+  , userPool = new CognitoUserPool({
     UserPoolId: appConfig.UserPoolId,
     ClientId: clientId,
-  });
-  const authenticationData = { Username: email, Password: password }
+  })
+  , authenticationData = { Username: email, Password: password }
   , authenticationDetails = new AuthenticationDetails(authenticationData)
   , cognitoUser = new CognitoUser({ Username: email, Pool: userPool })
 
@@ -163,9 +200,9 @@ const challenge = (clientId: string) => (s: EPFormState): void => {
 }
 
 const doLogin = (redirectUri?: string) => (s: EPFormState): void => {
-  const email = s.email.trim();
-  const password = s.password.trim();
-  const authenticationData = { Username: email, Password: password }
+  const email = s.email.trim()
+  , password = s.password.trim()
+  , authenticationData = { Username: email, Password: password }
   , authenticationDetails = new AuthenticationDetails(authenticationData)
   , cognitoUser = new CognitoUser({ Username: email, Pool: userPool })
 
@@ -191,25 +228,25 @@ const doLogin = (redirectUri?: string) => (s: EPFormState): void => {
 }
 
 const doSignUp = (s: EPFormState): void => {
-  const email = s.email.trim();
-  const password = s.password.trim();
-  const attributeList = [
+  const email = s.email.trim()
+  , password = s.password.trim()
+  , attributeList = [
     new CognitoUserAttribute({
       Name: 'email',
       Value: email,
     })
-  ];
+  ]
   userPool.signUp(email, password, attributeList, [], (err, result) => {
     if (err) { console.log(err.message || JSON.stringify(err)); return; }
-    console.log('user name is ' + result!.user.getUsername());
-    console.log('call result: ' + result);
-  });
+    console.log('user name is ' + result!.user.getUsername())
+    console.log('call result: ' + result)
+  })
 }
 
 export const CognitoSpikeForm = () => {
   return (
     <>
-      <EPForm submit={doLogin(undefined)}/> <br/>
+      <EPForm submit={doLogin()}/> <br/>
       Sign Up
       <EPForm submit={doSignUp}/> <br/>
       CJ Challenge
@@ -220,13 +257,69 @@ export const CognitoSpikeForm = () => {
   )
 }
 
+interface AuthorizationEndpointProps {
+  responseType: string
+  clientId: string
+  redirectUri: string
+  state?: string
+  identityProvider?: string
+  idpIdentifier?: string
+  scope?: string
+  codeChallengeMethod?: string
+  codeChallenge?: string
+}
+
+const AuthorizationEndpointParser = () => {
+  const x = new URL(document.location.href).searchParams
+  , p =
+    { responseType: x.get("response_type") || ""
+    , clientId: x.get("client_id") || ""
+    , redirectUri: x.get("redirect_uri") || ""
+    , state: x.get("state") || undefined
+    , identityProvider: x.get("identity_provider") || undefined
+    , idpIdentifier: x.get("idp_identifier") || undefined
+    , scope: x.get("scope") || undefined
+    , codeChallengeMethod: x.get("code_challenge_method") || undefined
+    , codeChallenge: x.get("code_challenge") || undefined
+    }
+
+  if (p.responseType == "" || p.clientId == "" || p.redirectUri == "")
+    console.error("bad request", x)
+
+  return <AuthorizationEndpoint {...p} />
+}
+
+const AuthorizationEndpoint = (props: AuthorizationEndpointProps) => {
+  const auth = new CognitoAuth(
+    { ClientId: appConfig.ClientId
+    , AppWebDomain: "//127.0.0.1:3000"
+    , TokenScopesArray: props.scope?.split(" ") || []
+    , RedirectUriSignIn: props.redirectUri
+    , RedirectUriSignOut: "//127.0.0.1:3000/login"
+    , UserPoolId: appConfig.UserPoolId
+    })
+  auth.useCodeGrantFlow()
+
+  auth.parseCognitoWebResponse(window.location.href)
+
+  return <></>
+}
+
 const AuthUI = () => {
   return (
     <Switch>
-      <Route path='/login' render={(props) => <LoginEndpoint {...props}/>}/>
-      <Route path="/logout" render={() => <LogoutEndpoint />}/>
+      <Route path='/login'>
+        <LoginEndpointParser />
+      </Route>
+      <Route path="/logout">
+        <LogoutEndpoint />
+      </Route>
+      <Route path="/oauth2/authorize">
+        <AuthorizationEndpointParser/>
+      </Route>
     </Switch>
   )
 }
 
-ReactDOM.render(<Router history={history}><AuthUI /></Router>, document.getElementById('app'))
+ReactDOM.render(<Router history={history}><AuthUI /></Router>,
+  document.getElementById('app'))
