@@ -11,7 +11,6 @@ import { Route, Switch } from 'react-router-dom'
 import appConfig from "./config"
 import { createBrowserHistory } from 'history'
 import { Router } from "react-router"
-import {CognitoAuth} from "amazon-cognito-auth-js"
 export const history = createBrowserHistory()
 
 AWS.config.region = appConfig.region
@@ -290,17 +289,7 @@ const AuthorizationEndpointParser = () => {
 }
 
 const AuthorizationEndpoint = (props: AuthorizationEndpointProps) => {
-  const auth = new CognitoAuth(
-    { ClientId: appConfig.ClientId
-    , AppWebDomain: "//127.0.0.1:3000"
-    , TokenScopesArray: props.scope?.split(" ") || []
-    , RedirectUriSignIn: props.redirectUri
-    , RedirectUriSignOut: "//127.0.0.1:3000/login"
-    , UserPoolId: appConfig.UserPoolId
-    })
-  auth.useCodeGrantFlow()
-
-  auth.parseCognitoWebResponse(window.location.href)
+  const cisp = new AWS.CognitoIdentityServiceProvider()
 
   return <></>
 }
@@ -316,6 +305,9 @@ const AuthUI = () => {
       </Route>
       <Route path="/oauth2/authorize">
         <AuthorizationEndpointParser/>
+      </Route>
+      <Route path="/">
+        <CognitoSpikeForm/>
       </Route>
     </Switch>
   )
