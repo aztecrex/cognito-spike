@@ -1,6 +1,7 @@
 import * as cdk from '@aws-cdk/core';
 import { Pool } from './pool';
-import { Website } from './webapp';
+import { Website } from './website';
+import { CognitoServer } from "./cognito-server"
 
 export class CognitoSpike extends cdk.Construct {
     constructor(scope: cdk.Construct) {
@@ -14,5 +15,6 @@ export class CognitoSpike extends cdk.Construct {
         pool.addOwnSite(bar.url);
         pool.addForeignSite("baz", baz.url);
 
+        new CognitoServer(this)
     }
 }

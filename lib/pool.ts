@@ -10,7 +10,6 @@ export class Pool extends cdk.Stack {
     constructor(scope: cdk.Construct) {
         super(scope, 'pool', {});
 
-
         const snsRole = new iam.Role(this, "UsersSNSRole", {
             assumedBy: new iam.ServicePrincipal("cognito-idp.amazonaws.com"),
         });
@@ -89,9 +88,7 @@ export class Pool extends cdk.Stack {
             ],
             userPoolId: this.pool.ref,
         });
-
     }
-
 
     addOwnSite(callbackUrl: string) {
         const callbacks = this.client.callbackUrLs || [];
