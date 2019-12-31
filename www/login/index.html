@@ -1,0 +1,29 @@
+<html>
+<head>
+  <script type="text/javascript">
+    const doAuth = (form) => {
+      console.log(form)
+      const http = new XMLHttpRequest()
+      , url = "https://ypa3nmey16.execute-api.us-east-1.amazonaws.com/prod/"
+      http.onreadystatechange = () => {
+        if (http.readyState == XMLHttpRequest.DONE)
+          console.log(http.responseText)
+      }
+      http.open("GET", url)
+      http.send()
+      // auth with my lambda
+      // do redirect
+    }
+  </script>
+</head>
+<body>
+  <h1>Log in</h1>
+  <!-- <div id="app"></div>
+  <script src="../login-bundle.js"></script> -->
+  <form onsubmit="event.preventDefault(); doAuth(this)">
+    <input type="text" placeholder="Email" required>
+    <input type="password" placeholder="Password" required>
+    <input type="submit">
+  </form>
+</body>
+</html>

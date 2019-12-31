@@ -6,7 +6,7 @@
     "cognito-spike": "bin/cognito-spike.js"
   },
   "scripts": {
-    "build": "tsc && webpack",
+    "build": "tsc && webpack && $(cd www && cp -r . ../dist)",
     "clean": "rm -rf out/ dist/",
     "watch": "tsc -w",
     "test": "jest",
