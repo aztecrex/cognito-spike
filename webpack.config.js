@@ -32,28 +32,4 @@ const glob = require("glob")
   }
 }
 
-, clientConfig = {
-  entry: {
-    login: "./src/main.tsx",
-  },
-  mode: "development",
-  devtool: "inline-source-map",
-  module: {
-    rules: [
-      {
-        exclude: /node_modules/,
-        use: {
-          loader: "ts-loader",
-          options: {
-            onlyCompileBundledFiles: true
-          }}}]},
-  resolve: {
-    extensions: [".tsx", ".ts", ".js"]
-  },
-  output: {
-    path: __dirname + "/dist/",
-    filename: "[name]-bundle.js",
-  }
-}
-
-module.exports = [lambdaConfig, clientConfig]
+module.exports = [lambdaConfig]
