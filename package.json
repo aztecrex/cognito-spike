@@ -8,7 +8,7 @@
   "scripts": {
     "build": "npm run clean && tsc && webpack && npm run static && npm run zip",
     "clean": "rm -rf out/ dist/",
-    "static": "mkdir dist/www/ && cp -r www/ dist/",
+    "static": "mkdir -p dist/www/ && cp -r www/ dist/",
     "zip": "zip -j dist/lam/authorize-bundle.zip dist/lam/authorize-bundle.js",
     "watch": "tsc -w",
     "test": "jest",
