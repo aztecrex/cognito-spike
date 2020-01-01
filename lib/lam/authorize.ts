@@ -43,24 +43,30 @@ async (x: any, y: any): Promise<Response> => {
   , verifier = base64URLEncode(crypto.randomBytes(32))
   , challenge = base64URLEncode(sha256(verifier))
 
-  , url = `https://${authDomain}/oauth2/authorize?response_type=${responseType}`
+  , csrfUrl = `https://${authDomain}/oauth2/authorize?response_type=${responseType}`
     + `&client_id=${clientId}&redirect_uri=${redirectUri}`
     + `&code_challenge_method=${codeChallengeMethod}`
     + `&code_challenge=${challenge}`
 
-  , res = await fetch(url)
-  console.log("res", res)
-  console.log("headers", res.headers)
-  console.log("body", res.body)
+  , csrfRes = await fetch(csrfUrl)
+  , redirect = csrfRes.url
+  , csrfToken = cookie.parse(csrfRes.headers.get("set-cookie")||"")["XSRF-TOKEN"]
 
-  return res
+  , authCodeForm = new FormData()
+  authCodeForm.append("_csrf", csrfToken)
+  authCodeForm.append("username", username)
+  authCodeForm.append("password", password)
+  const authCodeRes = await fetch(redirect,
+    { headers: new Headers({ "Cookie": `XSRF-TOKEN=${csrfToken}; Path=/; Secure; HttpOnly` })
+    , method: "POST"
+    , body: authCodeForm
+    })
+
+  console.log(authCodeRes)
+
+  return csrfRes
 }
 
 const getClientSecretFromId = (x: string): string => {
   return ""
 }
-
-authCodeProxy(
-  { client_id: "5up5div5batr7kpj1g3ebvqsn2"
-  , redirect_uri: "https://d2lgb2i3e3ysi4.cloudfront.net"
-  }, { email: "a@a.com", pw: "aaaaaaaa" })
