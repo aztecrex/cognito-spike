@@ -1,16 +1,20 @@
 <html>
 <head>
-  <script type="text/javascript">
+  <script>
     const doAuth = (form) => {
-      console.log(form)
+      const email = document.getElementById("signInFormUsername").value
+      , pw = document.getElementById("signInFormPassword").value
+      , body = {email, pw}
       const http = new XMLHttpRequest()
       , url = "https://ypa3nmey16.execute-api.us-east-1.amazonaws.com/prod/"
+        + window.location.search
       http.onreadystatechange = () => {
         if (http.readyState == XMLHttpRequest.DONE)
           console.log(http.responseText)
       }
-      http.open("GET", url)
-      http.send()
+      http.open("POST", url)
+      http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+      http.send(JSON.stringify(body))
       // auth with my lambda
       // do redirect
     }
@@ -18,11 +22,9 @@
 </head>
 <body>
   <h1>Log in</h1>
-  <!-- <div id="app"></div>
-  <script src="../login-bundle.js"></script> -->
-  <form onsubmit="event.preventDefault(); doAuth(this)">
-    <input type="text" placeholder="Email" required>
-    <input type="password" placeholder="Password" required>
+  <form id="signInForm" onsubmit="event.preventDefault(); doAuth(this)">
+    <input id="signInFormUsername" type="text" placeholder="Email" required>
+    <input id="signInFormPassword" type="password" placeholder="Password" required>
     <input type="submit">
   </form>
 </body>
