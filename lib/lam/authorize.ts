@@ -1,14 +1,15 @@
 import * as AWS from "aws-sdk"
 import { APIGatewayEvent } from "aws-lambda"
-import fetch, { Headers, Response } from "node-fetch"
+import fetch, { Headers } from "node-fetch"
 import * as cookie from "cookie"
 import * as FormData from "form-data"
 
 import crypto = require("crypto")
+import querystring = require("querystring")
 
 export const handler = async (e: APIGatewayEvent): Promise<any> => {
-  const authCodeRes= await authCodeProxy(e.queryStringParameters,
-    JSON.parse(e.body||""))
+  const authCodeRes= await
+    authCodeProxy(e.queryStringParameters, JSON.parse(e.body||""))
 
   , response = {
     statusCode: 200,
@@ -16,7 +17,7 @@ export const handler = async (e: APIGatewayEvent): Promise<any> => {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Credentials": true
     },
-    body: JSON.stringify({ url: authCodeRes.url })
+    body: JSON.stringify(authCodeRes)
   }
 
   return response
@@ -32,11 +33,18 @@ interface UserInfo {
   pw: string
 }
 
+interface ProxyReturn {
+  url: string
+  id_token: string
+  access_token: string
+  refresh_token: string
+}
+
 export const authCodeProxy =
-async (x: ClientInfo | any, y: UserInfo): Promise<{ url: string }> => {
+async (x: ClientInfo | any, y: UserInfo): Promise<ProxyReturn> => {
   const authDomain = "gofightwin.auth.us-east-1.amazoncognito.com"
   , clientId = x.client_id
-  , clentSecret = getClientSecretFromId(clientId)
+  , clientSecret = getClientSecretFromId(clientId)
   , responseType = "code"
   , redirectUri = x.redirect_uri
 
@@ -57,26 +65,52 @@ async (x: ClientInfo | any, y: UserInfo): Promise<{ url: string }> => {
 
   , csrfUrl = `https://${authDomain}/oauth2/authorize?response_type=${responseType}`
     + `&client_id=${clientId}&redirect_uri=${redirectUri}`
-    + `&code_challenge_method=${codeChallengeMethod}`
-    + `&code_challenge=${challenge}`
+    + `&code_challenge_method=${codeChallengeMethod}&code_challenge=${challenge}`
 
   , csrfRes = await fetch(csrfUrl)
   , redirect = csrfRes.url
   , csrfToken = cookie.parse(csrfRes.headers.get("set-cookie")||"")["XSRF-TOKEN"]
 
-  , authCodeForm = new FormData()
-  authCodeForm.append("_csrf", csrfToken)
-  authCodeForm.append("username", username)
-  authCodeForm.append("password", password)
-  const authCodeRes = await fetch(redirect,
+  , authCodeForm = makeFormData(
+    { "_csrf": csrfToken
+    , "username": username
+    , "password": password
+    })
+  , authCodeRes = await fetch(redirect,
     { headers: new Headers({ "Cookie": `XSRF-TOKEN=${csrfToken}; Path=/; Secure; HttpOnly` })
     , method: "POST"
     , body: authCodeForm
     })
+  , i = authCodeRes.url.indexOf("?code=")
+  , authCode = authCodeRes.url.substring(i + "?code=".length)
 
-  // get and return tokens
+  , authorization = Buffer.from(`${clientId}:${clientSecret}`).toString("base64")
+  , tokenResponse = await fetch(`https://${authDomain}/oauth2/token`,
+    { headers: new Headers(
+      { "Authorization": `Basic ${authorization}`
+      , "Content-Type": "application/x-www-form-urlencoded"
+      })
+    , method: "POST"
+    , body: querystring.stringify(
+      { "grant_type": "authorization_code"
+      , "client_id": clientId
+      , "code": authCode
+      , "redirect_uri": redirectUri
+      , "code_verifier": verifier
+      })
+    })
+  , tokens = await tokenResponse.json()
 
-  return { url: authCodeRes.url }
+  return { url: authCodeRes.url, ...tokens }
+}
+
+const makeFormData = (x: any) => {
+  const y = new FormData()
+  Object.keys(x).forEach(k => {
+    y.append(k, x[k])
+  })
+
+  return y
 }
 
 const getClientSecretFromId = (x: string): string => {

@@ -3,11 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "bin": {
-    "cognito-spike": "bin/cognito-spike.js"
+    "cognito-spike": "out/bin/cognito-spike.js"
   },
   "scripts": {
-    "build": "npm run clean && tsc && webpack && cp -r www/ dist/ && zip -j dist/lam/authorize-bundle.zip dist/lam/authorize-bundle.js",
+    "build": "npm run clean && tsc && webpack && npm run static && npm run zip",
     "clean": "rm -rf out/ dist/",
+    "static": "mkdir dist/www/ && cp -r www/ dist/",
+    "zip": "zip -j dist/lam/authorize-bundle.zip dist/lam/authorize-bundle.js",
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk"
