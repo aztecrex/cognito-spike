@@ -9,11 +9,13 @@
       , url = "https://ypa3nmey16.execute-api.us-east-1.amazonaws.com/prod/"
         + window.location.search
       http.onreadystatechange = () => {
-        if (http.readyState == XMLHttpRequest.DONE)
-          console.log(http.responseText)
+        if (http.readyState == XMLHttpRequest.DONE) {
+          const res = JSON.parse(http.responseText)
+          window.location = res.url
+        }
       }
       http.open("POST", url)
-      http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+      http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded')
       http.send(JSON.stringify(body))
       // auth with my lambda
       // do redirect

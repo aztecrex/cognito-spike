@@ -1,21 +1,24 @@
 import * as AWS from "aws-sdk"
 import { APIGatewayEvent } from "aws-lambda"
-import fetch from "node-fetch"
-import { Response } from "node-fetch"
+import fetch, { Headers, Response } from "node-fetch"
+import * as cookie from "cookie"
+import * as FormData from "form-data"
 
 import crypto = require("crypto")
 
 export const handler = async (e: APIGatewayEvent): Promise<any> => {
+  const res = await authCodeProxy(e.queryStringParameters, JSON.parse(e.body||""))
+  res.headers.append("Access-Control-Allow-Origin", "*")
+  res.headers.append("Access-Control-Allow-Credentials", "true")
+
   const response = {
     statusCode: 200,
     headers: {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Credentials": true
     },
-    body: JSON.stringify({ "message": "Hello World!" })
+    body: JSON.stringify({url: res.url})
   }
-
-  await authCodeProxy(e.queryStringParameters, JSON.parse(e.body||""))
 
   return response
 }
@@ -64,7 +67,7 @@ async (x: any, y: any): Promise<Response> => {
 
   console.log(authCodeRes)
 
-  return csrfRes
+  return authCodeRes
 }
 
 const getClientSecretFromId = (x: string): string => {
