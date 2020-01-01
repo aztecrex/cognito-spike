@@ -9,7 +9,7 @@
       , url = "https://ypa3nmey16.execute-api.us-east-1.amazonaws.com/prod/"
         + window.location.search
       http.onreadystatechange = () => {
-        if (http.readyState == XMLHttpRequest.DONE) {
+        if (http.readyState == XMLHttpRequest.DONE && http.status == 200) {
           const res = JSON.parse(http.responseText)
           window.location = res.url
         }

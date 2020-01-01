@@ -6,7 +6,7 @@
     "cognito-spike": "bin/cognito-spike.js"
   },
   "scripts": {
-    "build": "tsc && webpack && $(cd www && cp -r . ../dist)",
+    "build": "npm run clean && tsc && webpack && cp -r www/ dist/ && zip -j dist/lam/authorize-bundle.zip dist/lam/authorize-bundle.js",
     "clean": "rm -rf out/ dist/",
     "watch": "tsc -w",
     "test": "jest",
@@ -14,7 +14,6 @@
   },
   "devDependencies": {
     "@aws-cdk/assert": "^1.19.0",
-    "@types/amazon-cognito-auth-js": "^1.2.2",
     "@types/aws-lambda": "^8.10.39",
     "@types/cookie": "^0.3.3",
     "@types/jest": "^24.0.25",
@@ -36,8 +35,6 @@
     "@aws-cdk/aws-iam": "^1.19.0",
     "@aws-cdk/aws-s3": "^1.19.0",
     "@aws-cdk/core": "^1.19.0",
-    "amazon-cognito-auth-js": "^1.3.2",
-    "amazon-cognito-identity-js": "^3.2.1",
     "aws-lambda": "^1.0.4",
     "aws-sdk": "^2.596.0",
     "cookie": "^0.4.0",

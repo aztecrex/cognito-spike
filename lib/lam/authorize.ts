@@ -7,24 +7,33 @@ import * as FormData from "form-data"
 import crypto = require("crypto")
 
 export const handler = async (e: APIGatewayEvent): Promise<any> => {
-  const res = await authCodeProxy(e.queryStringParameters, JSON.parse(e.body||""))
-  res.headers.append("Access-Control-Allow-Origin", "*")
-  res.headers.append("Access-Control-Allow-Credentials", "true")
+  const authCodeRes= await authCodeProxy(e.queryStringParameters,
+    JSON.parse(e.body||""))
 
-  const response = {
+  , response = {
     statusCode: 200,
     headers: {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Credentials": true
     },
-    body: JSON.stringify({url: res.url})
+    body: JSON.stringify({ url: authCodeRes.url })
   }
 
   return response
 }
 
+interface ClientInfo {
+  client_id: string
+  redirect_uri: string
+}
+
+interface UserInfo {
+  email: string
+  pw: string
+}
+
 export const authCodeProxy =
-async (x: any, y: any): Promise<Response> => {
+async (x: ClientInfo | any, y: UserInfo): Promise<{ url: string }> => {
   const authDomain = "gofightwin.auth.us-east-1.amazoncognito.com"
   , clientId = x.client_id
   , clentSecret = getClientSecretFromId(clientId)
@@ -65,9 +74,9 @@ async (x: any, y: any): Promise<Response> => {
     , body: authCodeForm
     })
 
-  console.log(authCodeRes)
+  // get and return tokens
 
-  return authCodeRes
+  return { url: authCodeRes.url }
 }
 
 const getClientSecretFromId = (x: string): string => {
