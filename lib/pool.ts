@@ -25,10 +25,6 @@ export class Pool extends cdk.Stack {
         });
         snsRole.addManagedPolicy(snsPublishPolicy);
 
-        new Trigger(this, "createAuthChallenge")
-        new Trigger(this, "defineAuthChallenge")
-        new Trigger(this, "verifyAuthChallengeResponse")
-
         this.pool = new cognito.CfnUserPool(this, "users", {
             autoVerifiedAttributes: ["email"],
             usernameAttributes: ["email"],
@@ -55,9 +51,9 @@ export class Pool extends cdk.Stack {
                 deviceOnlyRememberedOnUserPrompt: false,
             },
             lambdaConfig: {
-                createAuthChallenge: "createAuthChallenge",
-                defineAuthChallenge: "defineAuthChallenge",
-                verifyAuthChallengeResponse: "verifyAuthChallengeResponse"
+                createAuthChallenge: new Trigger(this, "createAuthChallenge").fn.functionArn,
+                defineAuthChallenge: new Trigger(this, "defineAuthChallenge").fn.functionArn,
+                verifyAuthChallengeResponse: new Trigger(this, "verifyAuthChallengeResponse").fn.functionArn
             }
         });
 

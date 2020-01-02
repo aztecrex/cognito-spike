@@ -7,7 +7,7 @@ export class Trigger extends cdk.Construct {
     constructor(scope: cdk.Construct, id: string) {
         super(scope, `trigger-${id}`)
 
-        const fn = new lambda.Function(this, id,
+        this.fn = new lambda.Function(this, id,
             { runtime: lambda.Runtime.NODEJS_12_X
             , handler: `${id}-bundle.handler`
             , code: lambda.Code.fromAsset(`dist/lam/${id}-bundle.zip`)

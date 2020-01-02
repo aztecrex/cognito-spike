@@ -72,15 +72,14 @@ async (x: ClientInfo | any, y: UserInfo): Promise<ProxyReturn> => {
   , csrfRedirect = csrfRes.url
   , csrfToken = cookie.parse(csrfRes.headers.get("set-cookie")||"")["XSRF-TOKEN"]
 
-  , authCodeForm = makeFormData(
-    { "_csrf": csrfToken
-    , "username": username
-    , "password": password
-    })
   , authCodeRes = await fetch(csrfRedirect,
     { headers: new Headers({ "Cookie": `XSRF-TOKEN=${csrfToken}; Path=/; Secure; HttpOnly` })
     , method: "POST"
-    , body: authCodeForm
+    , body: makeFormData(
+      { "_csrf": csrfToken
+      , "username": username
+      , "password": password
+      })
     })
   , i = authCodeRes.url.indexOf("?code=")
   , authCode = authCodeRes.url.substring(i + "?code=".length)
