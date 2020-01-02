@@ -2,6 +2,8 @@ import cdk = require('@aws-cdk/core');
 import cognito = require('@aws-cdk/aws-cognito');
 import iam = require('@aws-cdk/aws-iam');
 
+import { Trigger } from "./trigger"
+
 export class Pool extends cdk.Stack {
 
     private pool: cognito.CfnUserPool;
@@ -23,6 +25,10 @@ export class Pool extends cdk.Stack {
         });
         snsRole.addManagedPolicy(snsPublishPolicy);
 
+        new Trigger(this, "createAuthChallenge")
+        new Trigger(this, "defineAuthChallenge")
+        new Trigger(this, "verifyAuthChallengeResponse")
+
         this.pool = new cognito.CfnUserPool(this, "users", {
             autoVerifiedAttributes: ["email"],
             usernameAttributes: ["email"],
@@ -34,7 +40,6 @@ export class Pool extends cdk.Stack {
                     requireNumbers: false,
                     requireSymbols: false,
                 },
-
             },
             adminCreateUserConfig: {
                 allowAdminCreateUserOnly: false,
@@ -48,8 +53,12 @@ export class Pool extends cdk.Stack {
             deviceConfiguration: {
                 challengeRequiredOnNewDevice: true,
                 deviceOnlyRememberedOnUserPrompt: false,
+            },
+            lambdaConfig: {
+                createAuthChallenge: "createAuthChallenge",
+                defineAuthChallenge: "defineAuthChallenge",
+                verifyAuthChallengeResponse: "verifyAuthChallengeResponse"
             }
-
         });
 
 

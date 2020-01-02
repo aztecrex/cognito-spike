@@ -9,7 +9,7 @@
     "build": "npm run clean && tsc && webpack && npm run static && npm run zip",
     "clean": "rm -rf out/ dist/",
     "static": "mkdir -p dist/www/ && cp -r www/ dist/",
-    "zip": "zip -j dist/lam/authorize-bundle.zip dist/lam/authorize-bundle.js",
+    "zip": "cd dist/lam && for x in *-bundle.js; do zip ${x%js}zip $x; done",
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk"
