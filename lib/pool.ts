@@ -2,7 +2,7 @@ import cdk = require('@aws-cdk/core');
 import cognito = require('@aws-cdk/aws-cognito');
 import iam = require('@aws-cdk/aws-iam');
 
-import { Trigger } from "./trigger"
+import { Trigger, LogTrigger } from "./trigger"
 
 export class Pool extends cdk.Stack {
 
@@ -53,7 +53,15 @@ export class Pool extends cdk.Stack {
             lambdaConfig: {
                 createAuthChallenge: new Trigger(this, "createAuthChallenge").fn.functionArn,
                 defineAuthChallenge: new Trigger(this, "defineAuthChallenge").fn.functionArn,
-                verifyAuthChallengeResponse: new Trigger(this, "verifyAuthChallengeResponse").fn.functionArn
+                verifyAuthChallengeResponse:
+                    new Trigger(this, "verifyAuthChallengeResponse").fn.functionArn,
+                postAuthentication: new LogTrigger(this, "postAuthentication").fn.functionArn,
+                customMessage: new LogTrigger(this, "customMessage").fn.functionArn,
+                postConfirmation: new LogTrigger(this, "postConfirmation").fn.functionArn,
+                preAuthentication: new LogTrigger(this, "preAuthentication").fn.functionArn,
+                preSignUp: new LogTrigger(this, "preSignUp").fn.functionArn,
+                preTokenGeneration: new LogTrigger(this, "preTokenGeneration").fn.functionArn,
+                userMigration: new LogTrigger(this, "userMigration").fn.functionArn
             }
         });
 

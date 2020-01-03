@@ -6,11 +6,14 @@ exports.handler = (event: any, context: any, callback: any) => {
         // event.response.privateChallengeParameters.answer = '5';
         // event.response.challengeMetadata = 'CAPTCHA_CHALLENGE';
         event.response.publicChallengeParameters = {
-            question: "Do you authorize baz to look at your stuff?",
-            // responses: ["yes", "no"]
+            client: "baz",
+            source: "public"
         }
-        event.response.privateChallengeParameters = { answer: "yes" };
-        event.response.challengeMetadata = "BAZ_CHALLENGE";
+        event.response.privateChallengeParameters = {
+            client: "baz",
+            source: "private"
+        }
+        event.response.challengeMetadata = "SCOPE";
     }
     console.log("create auth challenge");
 
