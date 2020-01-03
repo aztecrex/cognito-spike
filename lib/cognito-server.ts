@@ -7,7 +7,7 @@ export class CognitoServer extends cdk.Stack {
   constructor(scope: cdk.Construct) {
     super(scope, "cognito-server")
 
-    new Servlet(this, "authorize")
+    new Servlet(this, "entryPoint")
   }
 }
 
@@ -24,6 +24,8 @@ class Servlet extends cdk.Stack {
       })
 
     , api = new apigateway.LambdaRestApi(this, `${id}-api`, { handler: fn })
+
+    // api.root.addMethod("POST", new apigateway.LambdaIntegration(fn))
 
     new cdk.CfnOutput(this, `${id}Url`, { value: api.url })
   }

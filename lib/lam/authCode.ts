@@ -9,8 +9,11 @@ import querystring = require("querystring")
 AWS.config.region = "us-east-1"
 
 export const handler = async (e: APIGatewayEvent): Promise<any> => {
+  console.log("method", e.httpMethod)
+  console.log("path", e.path)
+
   const authCodeRes= await
-    authCodeProxy(e.queryStringParameters, JSON.parse(e.body||""))
+    cognitoLogin(e.queryStringParameters, JSON.parse(e.body||""))
 
   const response = {
     statusCode: 200,
@@ -41,8 +44,8 @@ interface ProxyReturn {
   refresh_token: string
 }
 
-export const authCodeProxy =
-async (x: ClientInfo | any, y: UserInfo): Promise<ProxyReturn> => {
+export const cognitoLogin =
+async (x: ClientInfo | any, y: UserInfo): Promise<any> => {
   const authDomain = "gofightwin.auth.us-east-1.amazoncognito.com"
   , clientId = x.client_id
   , clientSecret = getClientSecretFromId(clientId)
@@ -84,24 +87,28 @@ async (x: ClientInfo | any, y: UserInfo): Promise<ProxyReturn> => {
   , i = authCodeRes.url.indexOf("?code=")
   , authCode = authCodeRes.url.substring(i + "?code=".length)
 
-  , authorization = Buffer.from(`${clientId}:${clientSecret}`).toString("base64")
-  , tokenResponse = await fetch(`https://${authDomain}/oauth2/token`,
-    { headers: new Headers(
-      { "Authorization": `Basic ${authorization}`
-      , "Content-Type": "application/x-www-form-urlencoded"
-      })
-    , method: "POST"
-    , body: querystring.stringify(
-      { "grant_type": "authorization_code"
-      , "client_id": clientId
-      , "code": authCode
-      , "redirect_uri": redirectUri
-      , "code_verifier": verifier
-      })
-    })
-  , tokens = await tokenResponse.json()
+  return authCodeRes
 
-  return { url: authCodeRes.url, ...tokens, authCode }
+  // , authorization = Buffer.from(`${clientId}:${clientSecret}`).toString("base64")
+  // , tokenResponse = await fetch(`https://${authDomain}/oauth2/token`,
+  //   { headers: new Headers(
+  //     { "Authorization": `Basic ${authorization}`
+  //     , "Content-Type": "application/x-www-form-urlencoded"
+  //     })
+  //   , method: "POST"
+  //   , body: querystring.stringify(
+  //     { "grant_type": "authorization_code"
+  //     , "client_id": clientId
+  //     , "code": authCode
+  //     , "redirect_uri": redirectUri
+  //     , "code_verifier": verifier
+  //     })
+  //   })
+  // , tokens = await tokenResponse.json()
+
+  // console.log(tokenResponse)
+
+  //return { url: authCodeRes.url/*, ...tokens*/, authCode }
 }
 
 const makeFormData = (x: any) => {

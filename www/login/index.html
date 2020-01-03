@@ -6,13 +6,13 @@
       , pw = document.getElementById("signInFormPassword").value
       , body = {email, pw}
       , http = new XMLHttpRequest()
-      , url = "https://ypa3nmey16.execute-api.us-east-1.amazonaws.com/prod/"
+      , url = "https://gztyqmswbl.execute-api.us-east-1.amazonaws.com/prod/login"
         + window.location.search
       http.onreadystatechange = () => {
         if (http.readyState == XMLHttpRequest.DONE && http.status == 200) {
           const res = JSON.parse(http.responseText)
           console.log(res)
-          // window.location = res.url
+          window.location = res.url
         }
       }
       http.open("POST", url)

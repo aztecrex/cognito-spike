@@ -55,13 +55,13 @@ export class Pool extends cdk.Stack {
                 defineAuthChallenge: new Trigger(this, "defineAuthChallenge").fn.functionArn,
                 verifyAuthChallengeResponse:
                     new Trigger(this, "verifyAuthChallengeResponse").fn.functionArn,
-                postAuthentication: new LogTrigger(this, "postAuthentication").fn.functionArn,
-                customMessage: new LogTrigger(this, "customMessage").fn.functionArn,
-                postConfirmation: new LogTrigger(this, "postConfirmation").fn.functionArn,
-                preAuthentication: new LogTrigger(this, "preAuthentication").fn.functionArn,
-                preSignUp: new LogTrigger(this, "preSignUp").fn.functionArn,
-                preTokenGeneration: new LogTrigger(this, "preTokenGeneration").fn.functionArn,
-                userMigration: new LogTrigger(this, "userMigration").fn.functionArn
+                // postAuthentication: new LogTrigger(this, "postAuthentication").fn.functionArn,
+                // customMessage: new LogTrigger(this, "customMessage").fn.functionArn,
+                // postConfirmation: new LogTrigger(this, "postConfirmation").fn.functionArn,
+                // preAuthentication: new LogTrigger(this, "preAuthentication").fn.functionArn,
+                // preSignUp: new LogTrigger(this, "preSignUp").fn.functionArn,
+                // preTokenGeneration: new LogTrigger(this, "preTokenGeneration").fn.functionArn,
+                // userMigration: new LogTrigger(this, "userMigration").fn.functionArn
             }
         });
 
@@ -86,12 +86,12 @@ export class Pool extends cdk.Stack {
             supportedIdentityProviders: ["COGNITO"],
             logoutUrLs: ["https://platform.cj.com"],
             allowedOAuthFlows: ["code", "implicit",],
-            explicitAuthFlows:
-                [ "ALLOW_USER_PASSWORD_AUTH"
-                , "ALLOW_REFRESH_TOKEN_AUTH"
-                , "ALLOW_CUSTOM_AUTH"
-                , "ALLOW_USER_SRP_AUTH"
-                ],
+            // explicitAuthFlows:
+            //     [ "ALLOW_USER_PASSWORD_AUTH"
+            //     , "ALLOW_REFRESH_TOKEN_AUTH"
+            //     , "ALLOW_CUSTOM_AUTH"
+            //     , "ALLOW_USER_SRP_AUTH"
+            //     ],
             allowedOAuthScopes: ["email", "openid", "phone", "aws.cognito.signin.user.admin", "profile"],
             allowedOAuthFlowsUserPoolClient: true,
         });
@@ -128,12 +128,12 @@ export class Pool extends cdk.Stack {
             supportedIdentityProviders: ["COGNITO"],
             logoutUrLs: [callbackUrl],
             allowedOAuthFlows: ["code", "implicit",],
-            explicitAuthFlows:
-                [ "ALLOW_USER_PASSWORD_AUTH"
-                , "ALLOW_REFRESH_TOKEN_AUTH"
-                , "ALLOW_CUSTOM_AUTH"
-                , "ALLOW_USER_SRP_AUTH"
-                ],
+            // explicitAuthFlows:
+            //     [ "ALLOW_USER_PASSWORD_AUTH"
+            //     , "ALLOW_REFRESH_TOKEN_AUTH"
+            //     , "ALLOW_CUSTOM_AUTH"
+            //     , "ALLOW_USER_SRP_AUTH"
+            //     ],
             allowedOAuthScopes: ["email", "openid", "all/everything"],
             allowedOAuthFlowsUserPoolClient: true,
         });
