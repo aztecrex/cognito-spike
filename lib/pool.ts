@@ -86,6 +86,12 @@ export class Pool extends cdk.Stack {
             supportedIdentityProviders: ["COGNITO"],
             logoutUrLs: ["https://platform.cj.com"],
             allowedOAuthFlows: ["code", "implicit",],
+            explicitAuthFlows:
+                [ "ALLOW_USER_PASSWORD_AUTH"
+                , "ALLOW_REFRESH_TOKEN_AUTH"
+                , "ALLOW_CUSTOM_AUTH"
+                , "ALLOW_USER_SRP_AUTH"
+                ],
             allowedOAuthScopes: ["email", "openid", "phone", "aws.cognito.signin.user.admin", "profile"],
             allowedOAuthFlowsUserPoolClient: true,
         });
@@ -122,6 +128,12 @@ export class Pool extends cdk.Stack {
             supportedIdentityProviders: ["COGNITO"],
             logoutUrLs: [callbackUrl],
             allowedOAuthFlows: ["code", "implicit",],
+            explicitAuthFlows:
+                [ "ALLOW_USER_PASSWORD_AUTH"
+                , "ALLOW_REFRESH_TOKEN_AUTH"
+                , "ALLOW_CUSTOM_AUTH"
+                , "ALLOW_USER_SRP_AUTH"
+                ],
             allowedOAuthScopes: ["email", "openid", "all/everything"],
             allowedOAuthFlowsUserPoolClient: true,
         });
