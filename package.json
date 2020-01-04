@@ -6,10 +6,8 @@
     "cognito-spike": "out/bin/cognito-spike.js"
   },
   "scripts": {
-    "build": "npm run clean && tsc && webpack && npm run static && npm run zip",
+    "build": "npm run clean && ./build.sh",
     "clean": "rm -rf out/ dist/",
-    "static": "mkdir -p dist/www/ && cp -r www/ dist/",
-    "zip": "cd dist/lam && for x in *-bundle.js; do zip ${x%js}zip $x; done",
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk"
@@ -19,7 +17,7 @@
     "@types/aws-lambda": "^8.10.39",
     "@types/cookie": "^0.3.3",
     "@types/jest": "^24.0.25",
-    "@types/node": "^12.12.22",
+    "@types/node": "^12.12.24",
     "@types/node-fetch": "^2.5.4",
     "aws-cdk": "^1.19.0",
     "jest": "^24.9.0",
@@ -38,7 +36,7 @@
     "@aws-cdk/aws-s3": "^1.19.0",
     "@aws-cdk/core": "^1.19.0",
     "aws-lambda": "^1.0.4",
-    "aws-sdk": "^2.596.0",
+    "aws-sdk": "^2.597.0",
     "cookie": "^0.4.0",
     "form-data": "^3.0.0",
     "history": "^4.10.1",

@@ -8,7 +8,7 @@ import querystring = require("querystring")
 
 AWS.config.region = "us-east-1"
 
-export const handler = async (e: APIGatewayEvent): Promise<any> => {
+const handler = async (e: APIGatewayEvent): Promise<any> => {
   console.log("method", e.httpMethod)
   console.log("path", e.path)
 

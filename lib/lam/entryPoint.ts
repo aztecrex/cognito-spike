@@ -1,8 +1,8 @@
 import { APIGatewayEvent } from "aws-lambda"
 import { Response } from "node-fetch"
 
-import { AuthorizationEndpoint } from "./authorization"
-import { cognitoLogin } from "./authCode"
+import { authorize } from "../../src/authorization"
+import { cognitoLogin } from "../../src/authCode"
 
 const buildGatewayResponse = (res:Response) => {
   const headers: {[k: string]: string} = { "Access-Control-Allow-Origin": "*" }
@@ -20,7 +20,7 @@ export const handler = async (e: APIGatewayEvent): Promise<any> => {
   console.log("path", e.path)
 
   if (e.path == "/oauth2/authorize") {
-    const res = await AuthorizationEndpoint.authorize(e)
+    const res = await authorize(e)
     const gatewayReponse = buildGatewayResponse(res);
     console.log(gatewayReponse);
     return gatewayReponse;

@@ -5,9 +5,7 @@ const glob = require("glob")
   entry: () => {
     const fs = glob.sync("./lib/lam/**/*.ts")
     let y = {}
-    fs.forEach(f => {
-      y = Object.assign(y, { [path.parse(f).name]: f })
-    })
+    fs.forEach(f => Object.assign(y, { [path.parse(f).name]: f }))
     return y
   },
   target: "node",
