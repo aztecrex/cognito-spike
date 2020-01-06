@@ -7,7 +7,7 @@
   },
   "scripts": {
     "build": "npm run clean && ./build.sh",
-    "clean": "rm -r out/ dist/",
+    "clean": "rm -rf out/ dist/",
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk"
