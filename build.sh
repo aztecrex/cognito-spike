@@ -1,6 +1,8 @@
 #!/usr/bin/env zsh
 
-npx tsc \
-&& npx webpack \
-&& mkdir -p dist/www/ && cp -r www/ dist/ \
-&& cd dist/lam && for x in *-bundle.js; do zip ${x%js}zip $x; done
+set -e
+
+npx tsc
+npx webpack
+mkdir -p dist/www/ && cp -r www/ dist/
+for x in dist/lam/*-bundle.js; do zip --junk-paths ${x%js}zip $x; done
