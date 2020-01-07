@@ -10,6 +10,7 @@
         + window.location.search
       http.onreadystatechange = () => {
         if (http.readyState == XMLHttpRequest.DONE && http.status == 200) {
+          console.log(http)
           const res = JSON.parse(http.responseText)
           console.log(res)
           window.location = res.url

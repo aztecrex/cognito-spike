@@ -5,13 +5,15 @@ import { authorize } from "../../src/authorization"
 import { cognitoLogin } from "../../src/authCode"
 
 const buildGatewayResponse = (res:Response) => {
-  const headers: {[k: string]: string} = { "Access-Control-Allow-Origin": "*" }
+  const headers: {[k: string]: string} = { "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" }
   res.headers.forEach((v, k) => {
     headers[k] = v
   })
+  console.log("build gateway response", res)
+  console.log("url", res.url)
   return { statusCode: res.status
-    , headers: headers
-    , body: res.body
+    , headers: { "Access-Control-Allow-Origin": "*" }
+    , body: JSON.stringify({url: res.url})
   }
 }
 

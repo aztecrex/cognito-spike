@@ -20,12 +20,13 @@ async ({clientId, redirectUri}: any, {username, password}: any): Promise<Respons
 
   // determine if we login or not
   // if we login, munge the location header
-  const index = response.headers.get("location")!.indexOf("/login?");
-  const needsLogin = 0 <= index
+  const index = response.headers.get("location")!.indexOf("/login?")
+  , needsLogin = 0 <= index
   if (needsLogin) {
-    const cognitoLoginUrl = response.headers.get("location");
-    const pos = cognitoLoginUrl!.indexOf("/login?");
-    const ourLoginUrl = "https://d39tieb4p8s7kr.cloudfront.net" + cognitoLoginUrl?.substring(pos + 6);
+    const cognitoLoginUrl = response.headers.get("location")
+    , pos = cognitoLoginUrl!.indexOf("/login?")
+    , ourLoginUrl = "https://d39tieb4p8s7kr.cloudfront.net"
+      + cognitoLoginUrl?.substring(pos + 6);
     response.headers.set("location", ourLoginUrl);
   }
 
