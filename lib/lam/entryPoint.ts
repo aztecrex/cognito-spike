@@ -21,17 +21,19 @@ export const handler = async (e: APIGatewayEvent): Promise<any> => {
   console.log("method", e.httpMethod)
   console.log("path", e.path)
 
-  if (e.path == "/oauth2/authorize") {
-    const res = await authorize(e)
-    const gatewayReponse = buildGatewayResponse(res);
-    console.log(gatewayReponse);
-    return gatewayReponse;
-  }
+  try {
+    if (e.path == "/oauth2/authorize") {
+      const res = await authorize(e)
+      const gatewayReponse = buildGatewayResponse(res);
+      console.log(gatewayReponse);
+      return gatewayReponse;
+    }
 
-  if (e.path == "/login") {
-    const loginResponse = await
-      cognitoLogin(e.queryStringParameters, JSON.parse(e.body||""))
-    console.log(loginResponse)
-    return buildGatewayResponse(loginResponse);
-  }
+    if (e.path == "/login") {
+      const loginResponse = await
+        cognitoLogin(e.queryStringParameters, JSON.parse(e.body||""))
+      console.log(loginResponse)
+      return buildGatewayResponse(loginResponse);
+    }
+  } catch (e) { return Promise.reject(e) }
 }

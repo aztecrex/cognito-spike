@@ -16,10 +16,10 @@ async ({clientId, redirectUri}: any, {username, password}: any): Promise<Respons
   const authUrl = `https://${authDomain}/oauth2/authorize?response_type=code`
     + `&client_id=${clientId}&redirect_uri=${redirectUri}`
 
-  , response = await fetch(authUrl, { redirect: "manual" })
+  const response = await fetch(authUrl, { redirect: "manual" })
 
-  // determine if we login or not
-  // if we login, munge the location header
+  // determine if we log in or not
+  // if we log in, munge the location header
   const index = response.headers.get("location")!.indexOf("/login?")
   , needsLogin = 0 <= index
   if (needsLogin) {

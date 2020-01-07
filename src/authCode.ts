@@ -1,6 +1,6 @@
 import * as AWS from "aws-sdk"
 import { APIGatewayEvent } from "aws-lambda"
-import fetch, { Headers } from "node-fetch"
+import fetch, { Headers, Response } from "node-fetch"
 import * as cookie from "cookie"
 import * as FormData from "form-data"
 import crypto = require("crypto")
@@ -45,7 +45,7 @@ interface ProxyReturn {
 }
 
 export const cognitoLogin =
-async (x: ClientInfo | any, y: UserInfo): Promise<any> => {
+async (x: ClientInfo | any, y: UserInfo): Promise<Response> => {
   const authDomain = "gofightwin.auth.us-east-1.amazoncognito.com"
   , clientId = x.client_id
   , clientSecret = getClientSecretFromId(clientId)
@@ -69,7 +69,7 @@ async (x: ClientInfo | any, y: UserInfo): Promise<any> => {
 
   , csrfUrl = `https://${authDomain}/oauth2/authorize?response_type=${responseType}`
     + `&client_id=${clientId}&redirect_uri=${redirectUri}`
-    + `&code_challenge_method=${codeChallengeMethod}&code_challenge=${challenge}`
+    // + `&code_challenge_method=${codeChallengeMethod}&code_challenge=${challenge}`
 
   , csrfRes = await fetch(csrfUrl)
   , csrfRedirect = csrfRes.url
