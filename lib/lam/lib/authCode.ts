@@ -4,7 +4,6 @@ import fetch, { Headers, Response } from "node-fetch"
 import * as cookie from "cookie"
 import * as FormData from "form-data"
 import crypto = require("crypto")
-import querystring = require("querystring")
 
 AWS.config.region = "us-east-1"
 
@@ -76,13 +75,15 @@ async (x: ClientInfo | any, y: UserInfo): Promise<Response> => {
   , csrfToken = cookie.parse(csrfRes.headers.get("set-cookie")||"")["XSRF-TOKEN"]
 
   , authCodeRes = await fetch(csrfRedirect,
-    { headers: new Headers({ "Cookie": `XSRF-TOKEN=${csrfToken}; Path=/; Secure; HttpOnly` })
+    { headers: new Headers(
+      { "Cookie": `XSRF-TOKEN=${csrfToken}; Path=/; Secure; HttpOnly`})
     , method: "POST"
     , body: makeFormData(
       { "_csrf": csrfToken
       , "username": username
       , "password": password
       })
+    , redirect: "manual"
     })
   , i = authCodeRes.url.indexOf("?code=")
   , authCode = authCodeRes.url.substring(i + "?code=".length)
@@ -108,7 +109,7 @@ async (x: ClientInfo | any, y: UserInfo): Promise<Response> => {
 
   // console.log(tokenResponse)
 
-  //return { url: authCodeRes.url/*, ...tokens*/, authCode }
+  // return { url: authCodeRes.url/*, ...tokens*/, authCode }
 }
 
 const makeFormData = (x: any) => {
@@ -124,19 +125,19 @@ const getClientSecretFromId = (x: string): string => {
   return ""
 }
 
-const hmac = crypto.createHmac("sha256", getClientSecretFromId(""))
-const secretHash = hmac.update("a@a.com").update("5up5div5batr7kpj1g3ebvqsn2").digest("base64")
-const cisp = new AWS.CognitoIdentityServiceProvider()
-const params =
-  { AuthFlow: "CUSTOM_AUTH"
-  , ClientId: "5up5div5batr7kpj1g3ebvqsn2"
-  , AuthParameters:
-    { USERNAME: "a@a.com"
-    , SECRET_HASH: secretHash
-    }
-  }
+// const hmac = crypto.createHmac("sha256", getClientSecretFromId(""))
+// const secretHash = hmac.update("a@a.com").update("5up5div5batr7kpj1g3ebvqsn2").digest("base64")
+// const cisp = new AWS.CognitoIdentityServiceProvider()
+// const params =
+//   { AuthFlow: "CUSTOM_AUTH"
+//   , ClientId: "5up5div5batr7kpj1g3ebvqsn2"
+//   , AuthParameters:
+//     { USERNAME: "a@a.com"
+//     , SECRET_HASH: secretHash
+//     }
+//   }
 
-cisp.initiateAuth(params, (e, d) => {
-  if (e) { console.log(e); return }
-  console.log(d)
-})
+// cisp.initiateAuth(params, (e, d) => {
+//   if (e) { console.log(e); return }
+//   console.log(d)
+// })

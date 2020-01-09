@@ -1,0 +1,16 @@
+<html>
+<head>
+  <script>
+    const oauth2Authorize = async () => {
+      const authDomain = "gofightwin.auth.us-east-1.amazoncognito.com"
+      , authUrl = `https://${authDomain}/oauth2/authorize?response_type=code`
+        + `&client_id=5up5div5batr7kpj1g3ebvqsn2&redirect_uri=https://d2lgb2i3e3ysi4.cloudfront.net`
+      , res = await fetch(authUrl, { redirect: "follow", credentials: "include", mode: "no-cors" })
+      console.log(res)
+      console.log(res.url)
+    }
+  </script>
+</head>
+<body onload="oauth2Authorize()">
+</body>
+</html>

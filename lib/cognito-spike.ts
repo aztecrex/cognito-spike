@@ -15,7 +15,7 @@ export class CognitoSpike extends cdk.Construct {
         pool.addOwnSite(bar.url);
         pool.addForeignSite("baz", baz.url);
 
-        new Website(this, "login")
+        new Website(this, "login").store.grantPublicAccess()
 
         new CognitoServer(this)
     }

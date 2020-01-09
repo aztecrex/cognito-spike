@@ -17,6 +17,7 @@ async ({clientId, redirectUri}: any, {username, password}: any): Promise<Respons
     + `&client_id=${clientId}&redirect_uri=${redirectUri}`
 
   const response = await fetch(authUrl, { redirect: "manual" })
+  console.log("authorize response", response)
 
   // determine if we log in or not
   // if we log in, munge the location header
@@ -30,12 +31,10 @@ async ({clientId, redirectUri}: any, {username, password}: any): Promise<Respons
     response.headers.set("location", ourLoginUrl);
   }
 
-  console.log("response", response.headers)
-
   return response
 }
 
-authorizeDelegate(
-  { clientId: "5up5div5batr7kpj1g3ebvqsn2"
-  , redirectUri: "https://d310yu246nep7l.cloudfront.net"
-  }, {})
+// authorizeDelegate(
+//   { clientId: "5up5div5batr7kpj1g3ebvqsn2"
+//   , redirectUri: "https://d310yu246nep7l.cloudfront.net"
+//   }, {})
