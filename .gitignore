@@ -5,7 +5,8 @@
 node_modules/
 dist/
 out/
-
+.idea/
+*.iml
 # CDK asset staging directory
 .cdk.staging
 cdk.out
