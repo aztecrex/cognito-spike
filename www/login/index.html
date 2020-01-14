@@ -1,30 +1,37 @@
 <html>
 <head>
   <script>
-    const doAuth = (form) => {
+    const doAuth = async (form) => {
       const email = document.getElementById("signInFormUsername").value
       , pw = document.getElementById("signInFormPassword").value
-      , body = {email, pw}
-      , http = new XMLHttpRequest()
       , url = "https://gztyqmswbl.execute-api.us-east-1.amazonaws.com/prod/login"
-        + window.location.search
-      http.onreadystatechange = () => {
-        if (http.readyState == XMLHttpRequest.DONE) {
-          // console.log(http)
-          const res = JSON.parse(http.responseText)
-          // console.log(res)
-          // window.location = http.getResponseHeader("location")
-          // const res = JSON.parse(http.getResponseHeader("cookie"))
-          const cognitoCookie = res.cookie.substring(res.cookie.indexOf("cognito="))
-            .replace("HttpOnly", "").replace("Secure;", "")
-          console.log(cognitoCookie)
-          document.cookie = cognitoCookie
-          window.location = res.url
-        }
-      }
-      http.open("POST", url)
-      http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded')
-      http.send(JSON.stringify(body))
+      , res = await fetch(url + window.location.search,
+        { method: "POST"
+        , body: JSON.stringify({ email, pw })
+        })
+      console.log(res)
+
+      // , body = {email, pw}
+      // , http = new XMLHttpRequest()
+      // , url = "https://gztyqmswbl.execute-api.us-east-1.amazonaws.com/prod/login"
+      //   + window.location.search
+      // http.onreadystatechange = () => {
+      //   if (http.readyState == XMLHttpRequest.DONE) {
+      //     // console.log(http)
+      //     const res = JSON.parse(http.responseText)
+      //     // console.log(res)
+      //     // window.location = http.getResponseHeader("location")
+      //     // const res = JSON.parse(http.getResponseHeader("cookie"))
+      //     const cognitoCookie = res.cookie.substring(res.cookie.indexOf("cognito="))
+      //       .replace("HttpOnly", "").replace("Secure;", "")
+      //     console.log(cognitoCookie)
+      //     document.cookie = cognitoCookie
+      //     window.location = res.url
+      //   }
+      // }
+      // http.open("POST", url)
+      // http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded')
+      // http.send(JSON.stringify(body))
     }
   </script>
 </head>

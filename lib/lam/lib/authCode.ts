@@ -1,30 +1,10 @@
 import * as AWS from "aws-sdk"
-import { APIGatewayEvent } from "aws-lambda"
 import fetch, { Headers, Response } from "node-fetch"
 import * as cookie from "cookie"
 import * as FormData from "form-data"
 import crypto = require("crypto")
 
 AWS.config.region = "us-east-1"
-
-const handler = async (e: APIGatewayEvent): Promise<any> => {
-  console.log("method", e.httpMethod)
-  console.log("path", e.path)
-
-  const authCodeRes= await
-    cognitoLogin(e.queryStringParameters, JSON.parse(e.body||""))
-
-  const response = {
-    statusCode: 200,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Credentials": true
-    },
-    body: JSON.stringify(authCodeRes)
-  }
-
-  return response
-}
 
 interface ClientInfo {
   client_id: string
@@ -36,14 +16,33 @@ interface UserInfo {
   pw: string
 }
 
-interface ProxyReturn {
-  url: string
-  id_token: string
-  access_token: string
-  refresh_token: string
+export const cognitoLogin =
+async (x: ClientInfo | any, y: UserInfo): Promise<Response> => {
+  const cisp = new AWS.CognitoIdentityServiceProvider()
+  , clientId = x.client_id
+  , clientSecret = getClientSecretFromId(clientId)
+  , hmac = crypto.createHmac("sha256", clientSecret)
+  , secretHash = hmac.update(y.email).update(clientId).digest("base64")
+  , params =
+    { AuthFlow: "CUSTOM_AUTH"
+    , ClientId: clientId
+    , AuthParameters:
+      { USERNAME: y.email
+      , SRP_A: "1001"
+      , PASSWORD: y.pw
+      , SECRET_HASH: secretHash
+      }
+    }
+
+  , res = await cisp.initiateAuth(params).promise().catch(console.log)
+  console.log(res)
+
+  // if clientId is baz, then go through custom auth flow
+
+  return new Response("STUB")
 }
 
-export const cognitoLogin =
+export const cognitoLoginOld =
 async (x: ClientInfo | any, y: UserInfo): Promise<Response> => {
   const authDomain = "gofightwin.auth.us-east-1.amazoncognito.com"
   , clientId = x.client_id

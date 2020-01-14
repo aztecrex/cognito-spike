@@ -3,7 +3,7 @@ const glob = require("glob")
 
 , lambdaConfig = {
   entry: () => {
-    const fs = glob.sync("./lib/lam/**/*.ts")
+    const fs = glob.sync("./lib/lam/*.ts")
     let y = {}
     fs.forEach(f => Object.assign(y, { [path.parse(f).name]: f }))
     return y

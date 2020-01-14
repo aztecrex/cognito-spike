@@ -4,31 +4,38 @@ import { Response } from "node-fetch"
 import { authorize } from "./lib/authorization"
 import { cognitoLogin } from "./lib/authCode"
 
-const buildGatewayResponse = (res:Response) => {
-  const cookie = res.headers.get("set-cookie")!.replace(
+interface AuthResponse {
+  statusCode: number
+  headers: Object
+  body: string
+}
+
+const buildGatewayResponse = (res: Response): AuthResponse => {
+  const cookie = res.headers.get("set-cookie")?.replace(
     "Domain=gofightwin.auth.us-east-1.amazoncognito.com; ", "")
-  console.log("cookie", cookie)
-  return { statusCode: res.status
+  // console.log("cookie", cookie)
+  return (
+    { statusCode: res.status
     , headers: { "Access-Control-Allow-Origin": "*" }
     , body: JSON.stringify(
       { url: res.headers.get("location")
       , cookie
       })
-    }
+    })
 }
 
-export const handler = async (e: APIGatewayEvent): Promise<any> => {
+export const handler = async (e: APIGatewayEvent): Promise<AuthResponse> => {
   try {
+    let res: Response
     if (e.path == "/oauth2/authorize") {
-      const res = await authorize(e)
-      const gatewayReponse = buildGatewayResponse(res);
-      return gatewayReponse;
+      res = await authorize(e)
+    } else if (e.path == "/login") {
+      res = await
+        cognitoLogin(e.queryStringParameters, JSON.parse(e.body||""))
+    } else {
+      throw new Error("route not supported")
     }
 
-    if (e.path == "/login") {
-      const loginResponse = await
-        cognitoLogin(e.queryStringParameters, JSON.parse(e.body||""))
-      return buildGatewayResponse(loginResponse);
-    }
+    return buildGatewayResponse(res)
   } catch (e) { return Promise.reject(e) }
 }
