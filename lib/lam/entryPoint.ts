@@ -13,7 +13,6 @@ interface AuthResponse {
 const buildGatewayResponse = (res: Response): AuthResponse => {
   const cookie = res.headers.get("set-cookie")?.replace(
     "Domain=gofightwin.auth.us-east-1.amazoncognito.com; ", "")
-  // console.log("cookie", cookie)
   return (
     { statusCode: res.status
     , headers: { "Access-Control-Allow-Origin": "*" }

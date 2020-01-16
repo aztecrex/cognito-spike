@@ -1,7 +1,5 @@
 import * as AWS from "aws-sdk"
-import fetch, { Headers, Response } from "node-fetch"
-import * as cookie from "cookie"
-import * as FormData from "form-data"
+import { Response } from "node-fetch"
 import crypto = require("crypto")
 
 AWS.config.region = "us-east-1"
@@ -21,122 +19,42 @@ async (x: ClientInfo | any, y: UserInfo): Promise<Response> => {
   const cisp = new AWS.CognitoIdentityServiceProvider()
   , clientId = x.client_id
   , clientSecret = getClientSecretFromId(clientId)
-  , hmac = crypto.createHmac("sha256", clientSecret)
-  , secretHash = hmac.update(y.email).update(clientId).digest("base64")
+  , secretHash = crypto.createHmac("sha256", clientSecret).update(y.email)
+    .update(clientId).digest("base64")
   , params =
     { AuthFlow: "CUSTOM_AUTH"
+    , UserPoolId: "us-east-1_4OJDuhCXX"
     , ClientId: clientId
     , AuthParameters:
       { USERNAME: y.email
-      , SRP_A: "1001"
-      , PASSWORD: y.pw
+      // , SRP_A: "a1827509dacc6fa1a8f818aec4462b4459b85f1b75a52865ebedf45dc90c01ef183ec85dbe2356a865a08654cf7d6975ac4bedcedc45e3ec40d82a746ee92afa97e29a982aba4b79e688e05f69a77f074676718576595daa23a91d8e24ca0092045cab5e4f46a2dce895282857f3f521b6dc1302fd4ecd79abe5a94bb64a20693eeff5cf94ccb48febba7e011313db8185bc87714d8e14440d3d27d356f5e91c46cd365f2a594edcfb694c2a784070d98d1b136899b538fe48b953ce059a58691ce32fc94db4623134f7649f0b8f0dd427612ff451a882d8167fa745245ca77591cd836a250e44fc95eb6f357e21d627ee89d19e764041642886d96d2acba3b2"
+      // , PASSWORD: y.pw
       , SECRET_HASH: secretHash
       }
     }
 
-  , res = await cisp.initiateAuth(params).promise().catch(console.log)
+  , res = await cisp.adminInitiateAuth(params).promise().catch(console.log)
   console.log(res)
 
-  // if clientId is baz, then go through custom auth flow
+  const challengeParams =
+    { ChallengeName: "ADMIN_NO_SRP_AUTH"
+    , ClientId: clientId
+    , UserPoolId: "us-east-1_4OJDuhCXX"
+    , ChallengeResponses:
+      { PASSWORD: y.pw
+      , USERNAME: y.email
+      , SECRET_HASH: secretHash
+      }
+    }
+  , challengeRes = await cisp.adminRespondToAuthChallenge(challengeParams)
+    .promise().catch(console.log)
+  console.log(challengeRes)
 
   return new Response("STUB")
 }
 
-export const cognitoLoginOld =
-async (x: ClientInfo | any, y: UserInfo): Promise<Response> => {
-  const authDomain = "gofightwin.auth.us-east-1.amazoncognito.com"
-  , clientId = x.client_id
-  , clientSecret = getClientSecretFromId(clientId)
-  , responseType = "code"
-  , redirectUri = x.redirect_uri
-
-  , username = y.email
-  , password = y.pw
-
-  , codeChallengeMethod = "S256"
-
-  , base64URLEncode = (str: any) =>
-    str.toString('base64')
-      .replace(/\+/g, '-')
-      .replace(/\//g,'_')
-      .replace(/=/g, '')
-  , sha256 = (buffer: any) => crypto.createHash("sha256").update(buffer).digest()
-
-  , verifier = base64URLEncode(crypto.randomBytes(32))
-  , challenge = base64URLEncode(sha256(verifier))
-
-  , csrfUrl = `https://${authDomain}/oauth2/authorize?response_type=${responseType}`
-    + `&client_id=${clientId}&redirect_uri=${redirectUri}`
-    // + `&code_challenge_method=${codeChallengeMethod}&code_challenge=${challenge}`
-
-  , csrfRes = await fetch(csrfUrl)
-  , csrfRedirect = csrfRes.url
-  , csrfToken = cookie.parse(csrfRes.headers.get("set-cookie")||"")["XSRF-TOKEN"]
-
-  , authCodeRes = await fetch(csrfRedirect,
-    { headers: new Headers(
-      { "Cookie": `XSRF-TOKEN=${csrfToken}; Path=/; Secure; HttpOnly`})
-    , method: "POST"
-    , body: makeFormData(
-      { "_csrf": csrfToken
-      , "username": username
-      , "password": password
-      })
-    , redirect: "manual"
-    })
-  , i = authCodeRes.url.indexOf("?code=")
-  , authCode = authCodeRes.url.substring(i + "?code=".length)
-
-  return authCodeRes
-
-  // , authorization = Buffer.from(`${clientId}:${clientSecret}`).toString("base64")
-  // , tokenResponse = await fetch(`https://${authDomain}/oauth2/token`,
-  //   { headers: new Headers(
-  //     { "Authorization": `Basic ${authorization}`
-  //     , "Content-Type": "application/x-www-form-urlencoded"
-  //     })
-  //   , method: "POST"
-  //   , body: querystring.stringify(
-  //     { "grant_type": "authorization_code"
-  //     , "client_id": clientId
-  //     , "code": authCode
-  //     , "redirect_uri": redirectUri
-  //     , "code_verifier": verifier
-  //     })
-  //   })
-  // , tokens = await tokenResponse.json()
-
-  // console.log(tokenResponse)
-
-  // return { url: authCodeRes.url/*, ...tokens*/, authCode }
-}
-
-const makeFormData = (x: any) => {
-  const y = new FormData()
-  Object.keys(x).forEach(k => {
-    y.append(k, x[k])
-  })
+const getClientSecretFromId = (x: string): string => {
+  let y = ""
 
   return y
 }
-
-const getClientSecretFromId = (x: string): string => {
-  return ""
-}
-
-// const hmac = crypto.createHmac("sha256", getClientSecretFromId(""))
-// const secretHash = hmac.update("a@a.com").update("5up5div5batr7kpj1g3ebvqsn2").digest("base64")
-// const cisp = new AWS.CognitoIdentityServiceProvider()
-// const params =
-//   { AuthFlow: "CUSTOM_AUTH"
-//   , ClientId: "5up5div5batr7kpj1g3ebvqsn2"
-//   , AuthParameters:
-//     { USERNAME: "a@a.com"
-//     , SECRET_HASH: secretHash
-//     }
-//   }
-
-// cisp.initiateAuth(params, (e, d) => {
-//   if (e) { console.log(e); return }
-//   console.log(d)
-// })
