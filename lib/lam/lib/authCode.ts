@@ -42,6 +42,45 @@ async (x: ClientInfo | any, y: UserInfo): Promise<Response> => {
   return new Response("STUB")
 }
 
+export const stubLoginDeleteLater =
+async (): Promise<Response> => {
+  const y : UserInfo = {
+    email: "a@a.com",
+    pw: "aaaaaaaa"
+  }
+  const cisp = new AWS.CognitoIdentityServiceProvider()
+  , clientId = "5up5div5batr7kpj1g3ebvqsn2"
+  , clientSecret = getClientSecretFromId(clientId)
+  , hmac = crypto.createHmac("sha256", clientSecret)
+  , secretHash = hmac.update(y.email).update(clientId).digest("base64") 
+  , params =
+    { AuthFlow: "USER_PASSWORD_AUTH"
+    , ClientId: clientId
+    , AuthParameters:
+      { USERNAME: y.email
+      //, SRP_A: "1001"
+      , PASSWORD: y.pw
+      , DEVICE_KEY: '1234567890'
+      , SECRET_HASH: "" //secretHash
+      }
+    }
+  , res = await cisp.initiateAuth(params).promise().catch(a => console.log("catch statement1: " + a))
+  , tokens = JSON.parse(await new Response(JSON.stringify(res)).text())
+  , refreshAuthRes = await cisp.initiateAuth({
+     AuthFlow: "REFRESH_TOKEN",
+     ClientId: clientId,
+     AuthParameters:
+     {REFRESH_TOKEN: tokens.AuthenticationResult.RefreshToken, 
+      SECRET_HASH: ""
+     }
+  }).promise().catch(a => console.log("catch statement2: " + a))
+  console.log("response", JSON.stringify(res))
+  console.log("secret hash", secretHash)
+  console.log("funky tokens call", tokens)
+  console.log("refreshAuthRes", refreshAuthRes)
+  return new Response(JSON.stringify(res))
+}
+
 export const cognitoLoginOld =
 async (x: ClientInfo | any, y: UserInfo): Promise<Response> => {
   const authDomain = "gofightwin.auth.us-east-1.amazoncognito.com"
