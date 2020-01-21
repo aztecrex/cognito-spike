@@ -2,6 +2,8 @@ import cdk = require('@aws-cdk/core');
 import cognito = require('@aws-cdk/aws-cognito');
 import iam = require('@aws-cdk/aws-iam');
 
+import { Trigger, LogTrigger } from "./trigger"
+
 export class Pool extends cdk.Stack {
 
     private pool: cognito.CfnUserPool;
@@ -9,7 +11,6 @@ export class Pool extends cdk.Stack {
 
     constructor(scope: cdk.Construct) {
         super(scope, 'pool', {});
-
 
         const snsRole = new iam.Role(this, "UsersSNSRole", {
             assumedBy: new iam.ServicePrincipal("cognito-idp.amazonaws.com"),
@@ -35,7 +36,6 @@ export class Pool extends cdk.Stack {
                     requireNumbers: false,
                     requireSymbols: false,
                 },
-
             },
             adminCreateUserConfig: {
                 allowAdminCreateUserOnly: false,
@@ -49,8 +49,20 @@ export class Pool extends cdk.Stack {
             deviceConfiguration: {
                 challengeRequiredOnNewDevice: true,
                 deviceOnlyRememberedOnUserPrompt: false,
+            },
+            lambdaConfig: {
+                createAuthChallenge: new Trigger(this, "createAuthChallenge").fn.functionArn,
+                defineAuthChallenge: new Trigger(this, "defineAuthChallenge").fn.functionArn,
+                verifyAuthChallengeResponse:
+                    new Trigger(this, "verifyAuthChallengeResponse").fn.functionArn,
+                // postAuthentication: new LogTrigger(this, "postAuthentication").fn.functionArn,
+                // customMessage: new LogTrigger(this, "customMessage").fn.functionArn,
+                // postConfirmation: new LogTrigger(this, "postConfirmation").fn.functionArn,
+                // preAuthentication: new LogTrigger(this, "preAuthentication").fn.functionArn,
+                // preSignUp: new LogTrigger(this, "preSignUp").fn.functionArn,
+                // preTokenGeneration: new LogTrigger(this, "preTokenGeneration").fn.functionArn,
+                // userMigration: new LogTrigger(this, "userMigration").fn.functionArn
             }
-
         });
 
 
@@ -74,6 +86,12 @@ export class Pool extends cdk.Stack {
             supportedIdentityProviders: ["COGNITO"],
             logoutUrLs: ["https://platform.cj.com"],
             allowedOAuthFlows: ["code", "implicit",],
+            explicitAuthFlows:
+                [ "ALLOW_USER_PASSWORD_AUTH"
+                , "ALLOW_REFRESH_TOKEN_AUTH"
+                , "ALLOW_CUSTOM_AUTH"
+                , "ALLOW_USER_SRP_AUTH"
+                ],
             allowedOAuthScopes: ["email", "openid", "phone", "aws.cognito.signin.user.admin", "profile"],
             allowedOAuthFlowsUserPoolClient: true,
         });
@@ -89,9 +107,7 @@ export class Pool extends cdk.Stack {
             ],
             userPoolId: this.pool.ref,
         });
-
     }
-
 
     addOwnSite(callbackUrl: string) {
         const callbacks = this.client.callbackUrLs || [];
@@ -112,6 +128,12 @@ export class Pool extends cdk.Stack {
             supportedIdentityProviders: ["COGNITO"],
             logoutUrLs: [callbackUrl],
             allowedOAuthFlows: ["code", "implicit",],
+            explicitAuthFlows:
+                [ "ALLOW_USER_PASSWORD_AUTH"
+                , "ALLOW_REFRESH_TOKEN_AUTH"
+                , "ALLOW_CUSTOM_AUTH"
+                , "ALLOW_USER_SRP_AUTH"
+                ],
             allowedOAuthScopes: ["email", "openid", "all/everything"],
             allowedOAuthFlowsUserPoolClient: true,
         });

@@ -3,8 +3,8 @@
     "outDir": "out/",
     "target":"ES2018",
     "module": "commonjs",
+    "lib": ["es2016", "es2017.object", "es2017.string"],
     "jsx": "react",
-    "lib": ["es2016", "es2017.object", "es2017.string", "DOM"],
     "declaration": true,
     "strict": true,
     "noImplicitAny": true,
@@ -19,7 +19,7 @@
     "inlineSources": true,
     "experimentalDecorators": true,
     "strictPropertyInitialization":false,
-    "typeRoots": ["./node_modules/@types"]
+    "typeRoots": ["./node_modules/@types"],
   },
   "exclude": ["cdk.out", "out/"]
 }

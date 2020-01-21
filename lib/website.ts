@@ -7,26 +7,25 @@ import { Duration } from '@aws-cdk/core';
 export class Website extends cdk.Stack {
 
     readonly url: string;
+    readonly store: s3.Bucket;
 
     constructor(scope: cdk.Construct, id: string) {
         super(scope, 'website-' + id);
 
-        const store = new s3.Bucket(this, 'content', {
+        this.store = new s3.Bucket(this, 'content', {
             removalPolicy: cdk.RemovalPolicy.DESTROY,
         });
 
-        const accessId = new cloudfront.CfnCloudFrontOriginAccessIdentity(this, 'WebId', {
-            cloudFrontOriginAccessIdentityConfig: {
-                comment: "Web Identity for Static Site"
-            }
+        const accessId = new cloudfront.OriginAccessIdentity(this, "WebId", {
+            comment: "Web Identity for Static Site"
         });
-        new AccessIdReadPolicy(this, store, accessId);
+        new AccessIdReadPolicy(this, this.store, accessId);
 
         const cdn = new cloudfront.CloudFrontWebDistribution(this, "CDN", {
             originConfigs: [{
                 s3OriginSource: {
-                    s3BucketSource: store,
-                    originAccessIdentityId: accessId.ref,
+                    s3BucketSource: this.store,
+                    originAccessIdentity: accessId
                 },
                 behaviors: [{
                     isDefaultBehavior: true,
@@ -35,12 +34,17 @@ export class Website extends cdk.Stack {
                     defaultTtl: Duration.minutes(1),
                     maxTtl: Duration.minutes(5),
             }],}],
+            errorConfigurations: [{
+                errorCode: 404,
+                responsePagePath: "/index.html",
+                responseCode: 200
+            }]
         });
 
         this.url = "https://" + cdn.domainName;
 
         new cdk.CfnOutput(this, `${id}ContentStore`, {
-            value: store.bucketName,
+            value: this.store.bucketName,
         });
         new cdk.CfnOutput(this, `${id}Url`, {
             value: this.url,
@@ -50,19 +54,19 @@ export class Website extends cdk.Stack {
 }
 
 class AccessIdBucketReadAnyStatement extends iam.PolicyStatement {
-    constructor(bucket: s3.Bucket, accessId: cloudfront.CfnCloudFrontOriginAccessIdentity) {
+    constructor(bucket: s3.Bucket, accessId: cloudfront.OriginAccessIdentity) {
         super();
         this.effect = iam.Effect.ALLOW;
         this.addActions('s3:GetObject');
         this.addResources(bucket.arnForObjects('*'));
-        this.addCanonicalUserPrincipal(accessId.attrS3CanonicalUserId);
+        this.addCanonicalUserPrincipal(accessId.cloudFrontOriginAccessIdentityS3CanonicalUserId);
     }
 }
 
 class AccessIdReadPolicy extends s3.BucketPolicy {
-    accessId: cloudfront.CfnCloudFrontOriginAccessIdentity;
+    accessId: cloudfront.OriginAccessIdentity;
 
-    constructor(scope: cdk.Construct, bucket: s3.Bucket, accessId: cloudfront.CfnCloudFrontOriginAccessIdentity) {
+    constructor(scope: cdk.Construct, bucket: s3.Bucket, accessId: cloudfront.OriginAccessIdentity) {
         super(scope, bucket.node.id + "AccessIdReadAccess", {
             bucket: bucket
         });

@@ -1,24 +1,33 @@
-module.exports = {
-  entry: "./src/main.tsx",
+const glob = require("glob")
+, path = require("path")
+
+, lambdaConfig = {
+  entry: () => {
+    const fs = glob.sync("./lib/lam/*.ts")
+    let y = {}
+    fs.forEach(f => Object.assign(y, { [path.parse(f).name]: f }))
+    return y
+  },
+  target: "node",
   mode: "development",
   devtool: "inline-source-map",
   module: {
-    rules: [
-      {
-        exclude: /node_modules/,
-        use: {
-          loader: "ts-loader",
-          options: {
-            onlyCompileBundledFiles: true
-          }
-        }
-      }
-    ]
-  },
+    rules: [{
+      exclude: /node_modules/,
+      use: {
+        loader: "ts-loader",
+        options: {
+          onlyCompileBundledFiles: true
+        }}}]},
   resolve: {
-    extensions: [".tsx", ".ts", ".js"]
+    extensions: [".ts", ".js"]
   },
+  externals: ["aws-sdk"],
   output: {
-    filename: "main.js",
+    path: `${__dirname}/dist/lam/`,
+    filename: "[name]-bundle.js",
+    libraryTarget: "umd"
   }
 }
+
+module.exports = [lambdaConfig]

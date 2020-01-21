@@ -1,0 +1,24 @@
+<html>
+<head>
+  <script>
+    const doAuth = async (form) => {
+      const email = document.getElementById("signInFormUsername").value
+      , pw = document.getElementById("signInFormPassword").value
+      , url = "https://gztyqmswbl.execute-api.us-east-1.amazonaws.com/prod/login"
+      , res = await fetch(url + window.location.search,
+        { method: "POST"
+        , body: JSON.stringify({ email, pw })
+        })
+      console.log(res)
+    }
+  </script>
+</head>
+<body>
+  <h1>Log in</h1>
+  <form id="signInForm" onsubmit="event.preventDefault(); doAuth(this)">
+    <input id="signInFormUsername" type="text" placeholder="Email" required>
+    <input id="signInFormPassword" type="password" placeholder="Password" required>
+    <input type="submit">
+  </form>
+</body>
+</html>
