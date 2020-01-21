@@ -14,13 +14,13 @@ AWS.config.region = "us-east-1"
 
 
 interface ClientInfo {
-    client_id: string
-    redirect_uri: string
+  client_id: string
+  redirect_uri: string
 }
 
 interface UserInfo {
-    email: string
-    pw: string
+  email: string
+  pw: string
 }
 
 /*
@@ -29,63 +29,45 @@ DeviceName: "navigator.userAgent" in
 node_modules/amazon-cognito-identity-js/lib/CognitoUser.js:525
  */
 export const authenticateUser =
-    async (x: ClientInfo | any, y: UserInfo): Promise<Response> => {
-    const userPool = new CognitoUserPool({
-        UserPoolId: "us-east-1_4OJDuhCXX",
-        ClientId: x.client_id
+  async (x: ClientInfo | any, y: UserInfo): Promise<Response> => {
+  const userPool = new CognitoUserPool({
+    UserPoolId: "us-east-1_4OJDuhCXX",
+    ClientId: x.client_id
+  })
+
+  const authenticationData = { Username: y.email, Password: y.pw }
+  , authenticationDetails = new AuthenticationDetails(authenticationData)
+  , cognitoUser = new CognitoUser(
+    { Username: y.email
+    , Pool: userPool
     })
 
-    const authenticationData = { Username: y.email, Password: y.pw }
-        , authenticationDetails = new AuthenticationDetails(authenticationData)
-        , cognitoUser = new CognitoUser(
-        { Username: y.email
-            , Pool: userPool
-        })
-
-    cognitoUser.setAuthenticationFlowType("CUSTOM_AUTH");
-    let p: Promise<any> = new Promise(function(resolve, reject) {
+  cognitoUser.setAuthenticationFlowType("CUSTOM_AUTH");
+  let p: Promise<any> = new Promise(function(resolve, reject) {
     cognitoUser.authenticateUser(authenticationDetails, {
-        onSuccess: function(result) {
-            var accessToken = result.getAccessToken().getJwtToken();
-            //             //
-            //             //             /* Use the idToken for Logins Map when Federating User Pools with identity pools or when passing through an Authorization Header to an API Gateway Authorizer*/
-            //             //             // var idToken = result.idToken.jwtToken;
-            //             //             console.log("Success! ", result);
-            //             //             //@ts-ignore
-            //             //             global.authResult = result;
-            //             //
-            //             //             // cognitoUser.refreshSession(result.getRefreshToken(), (e, res) => {
-            //             //             //     if (e) console.log("refresh error", e)
-            //             //             //     else {
-            //             //             //         console.log("refresh result", res)
-            //             //             //         // cognitoUser.
-            //             //             //     }
-            //             //             //
-            //             //             // })
-            resolve(accessToken)
-        },
+      onSuccess: function(result: any) {
+        var accessToken = result.getAccessToken().getJwtToken();
+        resolve(accessToken)
+      },
 
-        onFailure: function(err) {
-            console.log("Failed1!", err);
-            // console.log("Failed!", JSON.stringify(err));
+      onFailure: function(err: any) {
+        console.log("Failed1!", err);
+        // console.log("Failed!", JSON.stringify(err));
 
-            reject("error")
-        },
-        customChallenge: function(challengeParameters) {
-            console.log("challengeParameters", challengeParameters)
-            // User authentication depends on challenge response
-            let challengeResponses
-            // if (confirm(challengeParameters.question))
-                challengeResponses = 'yes';
-            // else challengeResponses = 'no'
-            cognitoUser.sendCustomChallengeAnswer(challengeResponses, this);
-        }
+        reject("error")
+      },
+      customChallenge: function(challengeParameters: any) {
+        console.log("challengeParameters", challengeParameters)
+        let challengeResponses
+        challengeResponses = 'yes';
+        cognitoUser.sendCustomChallengeAnswer(challengeResponses, this);
+      }
     })
-    });
-    const v = await p//.then((v)=>{console.log("done!", v); return v})
-    console.log("done!", v)
+  });
+  const v = await p//.then((v)=>{console.log("done!", v); return v})
+  console.log("done!", v)
 
-    return v
+  return v
 }
 
 
