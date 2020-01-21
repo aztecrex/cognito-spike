@@ -31,6 +31,7 @@ export const handler = async (e: APIGatewayEvent): Promise<AuthResponse> => {
     } else if (e.path == "/login") {
       res = await
         cognitoLogin(e.queryStringParameters, JSON.parse(e.body||""))
+
     } else {
       throw new Error("route not supported")
     }

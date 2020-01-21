@@ -37,12 +37,14 @@
     "@aws-cdk/aws-iam": "^1.19.0",
     "@aws-cdk/aws-s3": "^1.19.0",
     "@aws-cdk/core": "^1.19.0",
+    "amazon-cognito-identity-js": "^3.2.2",
     "aws-lambda": "^1.0.4",
     "aws-sdk": "^2.597.0",
     "cookie": "^0.4.0",
     "form-data": "^3.0.0",
     "history": "^4.10.1",
     "node-fetch": "^2.6.0",
-    "source-map-support": "^0.5.16"
+    "source-map-support": "^0.5.16",
+    "window-mock": "^0.1.0"
   }
 }

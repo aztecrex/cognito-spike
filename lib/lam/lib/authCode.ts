@@ -1,60 +1,125 @@
 import * as AWS from "aws-sdk"
-import { Response } from "node-fetch"
+import fetch, { Headers, Response } from "node-fetch"
+// @ts-ignore
+global.fetch = fetch
+import WindowMock from "window-mock"
+// @ts-ignore
+global.WindowMock = WindowMock;
+import * as cookie from "cookie"
+import * as FormData from "form-data"
 import crypto = require("crypto")
+import {AuthenticationDetails, CognitoUser, CognitoUserPool, CognitoUserSession} from "amazon-cognito-identity-js";
 
 AWS.config.region = "us-east-1"
 
+
 interface ClientInfo {
-  client_id: string
-  redirect_uri: string
+    client_id: string
+    redirect_uri: string
 }
 
 interface UserInfo {
-  email: string
-  pw: string
+    email: string
+    pw: string
 }
+
+/*
+change
+DeviceName: "navigator.userAgent" in
+node_modules/amazon-cognito-identity-js/lib/CognitoUser.js:525
+ */
+export const authenticateUser =
+    async (x: ClientInfo | any, y: UserInfo): Promise<Response> => {
+    const userPool = new CognitoUserPool({
+        UserPoolId: "us-east-1_4OJDuhCXX",
+        ClientId: x.client_id
+    })
+
+    const authenticationData = { Username: y.email, Password: y.pw }
+        , authenticationDetails = new AuthenticationDetails(authenticationData)
+        , cognitoUser = new CognitoUser(
+        { Username: y.email
+            , Pool: userPool
+        })
+
+    cognitoUser.setAuthenticationFlowType("CUSTOM_AUTH");
+    let p: Promise<any> = new Promise(function(resolve, reject) {
+    cognitoUser.authenticateUser(authenticationDetails, {
+        onSuccess: function(result) {
+            var accessToken = result.getAccessToken().getJwtToken();
+            //             //
+            //             //             /* Use the idToken for Logins Map when Federating User Pools with identity pools or when passing through an Authorization Header to an API Gateway Authorizer*/
+            //             //             // var idToken = result.idToken.jwtToken;
+            //             //             console.log("Success! ", result);
+            //             //             //@ts-ignore
+            //             //             global.authResult = result;
+            //             //
+            //             //             // cognitoUser.refreshSession(result.getRefreshToken(), (e, res) => {
+            //             //             //     if (e) console.log("refresh error", e)
+            //             //             //     else {
+            //             //             //         console.log("refresh result", res)
+            //             //             //         // cognitoUser.
+            //             //             //     }
+            //             //             //
+            //             //             // })
+            resolve(accessToken)
+        },
+
+        onFailure: function(err) {
+            console.log("Failed1!", err);
+            // console.log("Failed!", JSON.stringify(err));
+
+            reject("error")
+        },
+        customChallenge: function(challengeParameters) {
+            console.log("challengeParameters", challengeParameters)
+            // User authentication depends on challenge response
+            let challengeResponses
+            // if (confirm(challengeParameters.question))
+                challengeResponses = 'yes';
+            // else challengeResponses = 'no'
+            cognitoUser.sendCustomChallengeAnswer(challengeResponses, this);
+        }
+    })
+    });
+    const v = await p//.then((v)=>{console.log("done!", v); return v})
+    console.log("done!", v)
+
+    return v
+}
+
+
+
+
 
 export const cognitoLogin =
 async (x: ClientInfo | any, y: UserInfo): Promise<Response> => {
   const cisp = new AWS.CognitoIdentityServiceProvider()
   , clientId = x.client_id
   , clientSecret = getClientSecretFromId(clientId)
-  , secretHash = crypto.createHmac("sha256", clientSecret).update(y.email)
-    .update(clientId).digest("base64")
+  , hmac = crypto.createHmac("sha256", clientSecret)
+  , secretHash = hmac.update(y.email).update(clientId).digest("base64")
   , params =
     { AuthFlow: "CUSTOM_AUTH"
-    , UserPoolId: "us-east-1_4OJDuhCXX"
     , ClientId: clientId
     , AuthParameters:
       { USERNAME: y.email
-      // , SRP_A: "a1827509dacc6fa1a8f818aec4462b4459b85f1b75a52865ebedf45dc90c01ef183ec85dbe2356a865a08654cf7d6975ac4bedcedc45e3ec40d82a746ee92afa97e29a982aba4b79e688e05f69a77f074676718576595daa23a91d8e24ca0092045cab5e4f46a2dce895282857f3f521b6dc1302fd4ecd79abe5a94bb64a20693eeff5cf94ccb48febba7e011313db8185bc87714d8e14440d3d27d356f5e91c46cd365f2a594edcfb694c2a784070d98d1b136899b538fe48b953ce059a58691ce32fc94db4623134f7649f0b8f0dd427612ff451a882d8167fa745245ca77591cd836a250e44fc95eb6f357e21d627ee89d19e764041642886d96d2acba3b2"
-      // , PASSWORD: y.pw
+      , SRP_A: "1001"
+      , PASSWORD: y.pw
       , SECRET_HASH: secretHash
       }
     }
 
-  , res = await cisp.adminInitiateAuth(params).promise().catch(console.log)
+  , res = await cisp.initiateAuth(params).promise().catch(console.log)
   console.log(res)
 
-  const challengeParams =
-    { ChallengeName: "ADMIN_NO_SRP_AUTH"
-    , ClientId: clientId
-    , UserPoolId: "us-east-1_4OJDuhCXX"
-    , ChallengeResponses:
-      { PASSWORD: y.pw
-      , USERNAME: y.email
-      , SECRET_HASH: secretHash
-      }
-    }
-  , challengeRes = await cisp.adminRespondToAuthChallenge(challengeParams)
-    .promise().catch(console.log)
-  console.log(challengeRes)
+  // if clientId is baz, then go through custom auth flow
 
   return new Response("STUB")
 }
 
 const getClientSecretFromId = (x: string): string => {
-  let y = ""
+    let y = ""
 
   return y
 }

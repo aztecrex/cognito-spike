@@ -4,6 +4,7 @@ import { CognitoUserPoolTriggerEvent } from "aws-lambda";
 export const handler =
 async (e: CognitoUserPoolTriggerEvent): Promise<CognitoUserPoolTriggerEvent> => {
   console.log(e)
+    console.log("session", JSON.stringify(e.request.session));
   if (e.request.challengeName == 'CUSTOM_CHALLENGE') {
     // e.response.publicChallengeParameters = {};
     // // e.response.publicChallengeParameters.captchaUrl = 'url/123.jpg'
@@ -14,10 +15,7 @@ async (e: CognitoUserPoolTriggerEvent): Promise<CognitoUserPoolTriggerEvent> => 
       client: "baz",
       source: "public"
     }
-    e.response.privateChallengeParameters = {
-      client: "baz",
-      source: "private"
-    }
+    e.response.privateChallengeParameters = { answer : 'yes'};
     e.response.challengeMetadata = "SCOPE";
   }
   console.log("create auth challenge");

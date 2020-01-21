@@ -5,7 +5,7 @@ import { CognitoServer } from "./cognito-server"
 
 export class CognitoSpike extends cdk.Construct {
     constructor(scope: cdk.Construct) {
-        super(scope, 'cognito-spike');
+        super(scope, 'cognito-spike-2');
 
         const pool = new Pool(this);
         const foo = new Website(this, 'foo');
