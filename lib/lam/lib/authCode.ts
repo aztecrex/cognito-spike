@@ -70,10 +70,6 @@ export const authenticateUser =
   return v
 }
 
-
-
-
-
 export const cognitoLogin =
 async (x: ClientInfo | any, y: UserInfo): Promise<Response> => {
   const cisp = new AWS.CognitoIdentityServiceProvider()
