@@ -97,29 +97,44 @@ async (x: ClientInfo | any, y: UserInfo): Promise<Response> => {
   const cisp = new AWS.CognitoIdentityServiceProvider()
   , clientId = x.client_id
   , clientSecret = getClientSecretFromId(clientId)
-  , hmac = crypto.createHmac("sha256", clientSecret)
-  , secretHash = hmac.update(y.email).update(clientId).digest("base64")
+  , secretHash = crypto.createHmac("sha256", clientSecret)
+    .update(y.email).update(clientId).digest("base64")
+
   , params =
     { AuthFlow: "CUSTOM_AUTH"
     , ClientId: clientId
     , AuthParameters:
       { USERNAME: y.email
-      , SRP_A: "1001"
-      , PASSWORD: y.pw
+      // , PASSWORD: y.pw
+      // , SRP_A: "a"
       , SECRET_HASH: secretHash
+      , ChallengeName: "SRP_A"
       }
     }
-
   , res = await cisp.initiateAuth(params).promise().catch(console.log)
   console.log(res)
 
-  // if clientId is baz, then go through custom auth flow
+  const challengeParams =
+    { ChallengeName: "PASSWORD_VERIFIER"
+    , ClientId: clientId
+    , ChallengeResponses:
+      { PASSWORD_CLAIM_SIGNATURE: "foo"
+      , PASSWORD_CLAIM_SECRET_BLOCK: "bar"
+      // , TIMESTAMP: ""
+      , USERNAME: y.email
+      , SECRET_HASH: secretHash
+      }
+    }
+  , challengeRes = await cisp.respondToAuthChallenge(challengeParams)
+    .promise().catch(console.log)
+  console.log(challengeRes)
 
   return new Response("STUB")
 }
 
 const getClientSecretFromId = (x: string): string => {
-    let y = ""
+  let y = ""
+
 
   return y
 }
