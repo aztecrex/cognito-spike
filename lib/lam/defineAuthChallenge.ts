@@ -10,7 +10,10 @@ async (event: CognitoUserPoolTriggerEvent): Promise<CognitoUserPoolTriggerEvent>
         event.response.issueTokens = false;
         event.response.failAuthentication = false;
         event.response.challengeName = 'PASSWORD_VERIFIER';
-    } else if (event.request.session!.length == 2 && event.request.session![1].challengeName == 'PASSWORD_VERIFIER' && event.request.session![1].challengeResult == true) {
+    } else if (event.request.session!.length == 2
+        && event.request.session![1].challengeName == 'PASSWORD_VERIFIER'
+        && event.request.session![1].challengeResult == true
+        && event.callerContext.clientId == ) {
         event.response.issueTokens = false;
         event.response.failAuthentication = false;
         event.response.challengeName = 'CUSTOM_CHALLENGE';

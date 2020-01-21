@@ -2,7 +2,7 @@ import { APIGatewayEvent } from "aws-lambda"
 import { Response } from "node-fetch"
 
 import { authorize } from "./lib/authorization"
-import { cognitoLogin } from "./lib/authCode"
+import {authenticateUser, cognitoLogin} from "./lib/authCode"
 
 interface AuthResponse {
   statusCode: number
@@ -30,7 +30,7 @@ export const handler = async (e: APIGatewayEvent): Promise<AuthResponse> => {
       res = await authorize(e)
     } else if (e.path == "/login") {
       res = await
-        cognitoLogin(e.queryStringParameters, JSON.parse(e.body||""))
+          authenticateUser(e.queryStringParameters, JSON.parse(e.body||""))
 
     } else {
       throw new Error("route not supported")
