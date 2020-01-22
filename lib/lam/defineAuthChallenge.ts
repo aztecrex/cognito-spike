@@ -13,7 +13,7 @@ async (event: CognitoUserPoolTriggerEvent): Promise<CognitoUserPoolTriggerEvent>
     } else if (event.request.session!.length == 2
         && event.request.session![1].challengeName == 'PASSWORD_VERIFIER'
         && event.request.session![1].challengeResult == true
-        && event.callerContext.clientId == ) {
+        && event.callerContext.clientId == '') {
         event.response.issueTokens = false;
         event.response.failAuthentication = false;
         event.response.challengeName = 'CUSTOM_CHALLENGE';

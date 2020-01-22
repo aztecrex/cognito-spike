@@ -2,9 +2,9 @@ import * as AWS from "aws-sdk"
 import fetch, { Headers, Response } from "node-fetch"
 // @ts-ignore
 global.fetch = fetch
-import WindowMock from "window-mock"
+// import WindowMock from "window-mock"
 // @ts-ignore
-global.WindowMock = WindowMock;
+// global.WindowMock = WindowMock;
 import * as cookie from "cookie"
 import * as FormData from "form-data"
 import crypto = require("crypto")

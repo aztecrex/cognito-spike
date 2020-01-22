@@ -7,6 +7,8 @@
   },
   "scripts": {
     "build": "npm run clean && ./build.sh",
+    "deploy": "./build.sh && cdk deploy --require-approval never '*'",
+    "diff": "./build.sh && cdk diff",
     "clean": "rm -rf out/ dist/",
     "watch": "tsc -w",
     "test": "jest",
@@ -41,6 +43,7 @@
     "aws-lambda": "^1.0.4",
     "aws-sdk": "^2.597.0",
     "cookie": "^0.4.0",
+    "dotenv": "^8.2.0",
     "form-data": "^3.0.0",
     "history": "^4.10.1",
     "node-fetch": "^2.6.0",
