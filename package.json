@@ -46,7 +46,7 @@
     "dotenv": "^8.2.0",
     "form-data": "^3.0.0",
     "history": "^4.10.1",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "source-map-support": "^0.5.16",
     "window-mock": "^0.1.0"
   }
